@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resume Revision Agent – Chance Create</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -453,23 +454,43 @@
 
   async function handleFile(file) {
     fileNameEl.style.display = 'block';
-    fileNameEl.textContent = '📎 ' + file.name;
-    if (file.type === 'text/plain') {
-      uploadedText = await file.text();
-    } else if (file.type === 'application/pdf') {
-      const base64 = await readFileAsBase64(file);
-      uploadedText = '__PDF_BASE64__:' + base64 + ':__MIMETYPE__:application/pdf';
-    } else {
-      uploadedText = '__DOCX__:' + file.name;
+    fileNameEl.textContent = '📎 ' + file.name + ' — extracting text...';
+    uploadedText = '';
+    try {
+      if (file.type === 'text/plain') {
+        uploadedText = await file.text();
+        fileNameEl.textContent = '✅ ' + file.name;
+      } else if (file.type === 'application/pdf') {
+        uploadedText = await extractPdfText(file);
+        fileNameEl.textContent = '✅ ' + file.name + ' — text extracted';
+      } else {
+        fileNameEl.textContent = '⚠️ Word docs not supported — paste your resume text below instead';
+      }
+    } catch(e) {
+      fileNameEl.textContent = '⚠️ Could not read file — paste your resume text below instead';
     }
   }
 
-  function readFileAsBase64(file) {
+  async function extractPdfText(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onload = async function(e) {
+        try {
+          const typedArray = new Uint8Array(e.target.result);
+          const pdfjsLib = window['pdfjs-dist/build/pdf'];
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+          let fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(item => item.str).join(' ') + '\n';
+          }
+          resolve(fullText.trim());
+        } catch(err) { reject(err); }
+      };
       reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.readAsArrayBuffer(file);
     });
   }
 
@@ -497,26 +518,10 @@
     try {
       let messageContent = [];
 
-      if (resumeContent.startsWith('__PDF_BASE64__:')) {
-        const parts = resumeContent.split(':__MIMETYPE__:');
-        const base64 = parts[0].replace('__PDF_BASE64__:', '');
-        const mimeType = parts[1];
-        messageContent.push({
-          type: 'document',
-          source: { type: 'base64', media_type: mimeType, data: base64 }
-        });
-        messageContent.push({
-          type: 'text',
-          text: buildPrompt(null, targetRole, industry, focusNote)
-        });
-      } else if (resumeContent.startsWith('__DOCX__:')) {
-        throw new Error('Word documents cannot be read directly. Please copy and paste your resume text into the text box instead.');
-      } else {
-        messageContent.push({
-          type: 'text',
-          text: buildPrompt(resumeContent, targetRole, industry, focusNote)
-        });
-      }
+      messageContent.push({
+        type: 'text',
+        text: buildPrompt(resumeContent, targetRole, industry, focusNote)
+      });
 
       const response = await fetch('/.netlify/functions/analyze', {
         method: 'POST',
