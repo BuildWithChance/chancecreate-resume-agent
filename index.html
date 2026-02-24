@@ -570,9 +570,7 @@
       const data = await response.json();
       if (data.error) throw new Error(data.error.message);
 
-      const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-      console.log('API RESPONSE:', JSON.stringify(parsed));
-      const raw = (parsed.content || []).map(c => c.text || '').join('');
+      const raw = (data.content || []).map(c => c.text || '').join('');
       parseAndDisplay(raw);
 
     } catch (err) {
