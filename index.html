@@ -76,7 +76,6 @@
     gap: 24px;
   }
 
-  /* Upload Zone */
   .upload-zone {
     border: 2px dashed var(--border);
     border-radius: var(--radius);
@@ -105,7 +104,6 @@
     display: none;
   }
 
-  /* Target Role Input */
   .field-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -113,11 +111,7 @@
   }
   @media (max-width: 600px) { .field-group { grid-template-columns: 1fr; } }
 
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  .field { display: flex; flex-direction: column; gap: 8px; }
   .field label {
     font-size: 12px;
     font-weight: 600;
@@ -140,9 +134,7 @@
   .field input:focus, .field select:focus, .field textarea:focus {
     border-color: #ceb1dd;
   }
-  .field select option { background: var(--surface2); }
 
-  /* Paste zone */
   .paste-divider {
     display: flex;
     align-items: center;
@@ -157,7 +149,6 @@
     background: var(--border);
   }
 
-  /* CTA Button */
   .btn-analyze {
     background: #ceb1dd;
     color: #242424;
@@ -175,7 +166,6 @@
   .btn-analyze:hover { background: #bfa0cc; transform: translateY(-1px); }
   .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  /* Loading */
   .loading {
     display: none;
     text-align: center;
@@ -195,12 +185,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading p { color: var(--muted); font-size: 14px; }
 
-  /* Results */
-  .results {
-    display: none;
-    flex-direction: column;
-    gap: 20px;
-  }
+  .results { display: none; flex-direction: column; gap: 20px; }
   .results.active { display: flex; }
 
   .result-header {
@@ -248,7 +233,6 @@
     white-space: pre-wrap;
   }
 
-  /* Issue list */
   .issue-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
   .issue-item {
     display: flex;
@@ -279,7 +263,6 @@
   .issue-item.warning .issue-tag { background: rgba(201,122,58,0.15); color: var(--accent2); }
   .issue-item.tip .issue-tag { background: rgba(90,158,111,0.15); color: var(--success); }
 
-  /* Revised resume output */
   .resume-output {
     background: #fff;
     color: #1a1a1a;
@@ -343,7 +326,7 @@
     border-radius: 8px;
     padding: 16px 20px;
     font-size: 14px;
-    color: #e88;
+    color: #c0392b;
   }
   .error-box.active { display: block; }
 
@@ -369,7 +352,6 @@
 
 <div class="main">
 
-  <!-- Upload Zone -->
   <div class="upload-zone" id="dropZone">
     <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt">
     <div class="upload-icon">📄</div>
@@ -378,7 +360,6 @@
     <p class="file-name" id="fileName"></p>
   </div>
 
-  <!-- OR paste -->
   <div class="paste-divider">or paste your resume text below</div>
 
   <div class="field">
@@ -386,7 +367,6 @@
     <textarea id="resumeText" placeholder="Paste your full resume here if you prefer not to upload a file..." rows="6"></textarea>
   </div>
 
-  <!-- Target info -->
   <div class="field-group">
     <div class="field">
       <label>Target Role / Job Title</label>
@@ -409,38 +389,32 @@
     Analyze & Rewrite My Resume →
   </button>
 
-  <!-- Loading -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p>Reading your resume the way a recruiter would…</p>
   </div>
 
-  <!-- Results -->
   <div class="results" id="results">
     <div class="result-header">
       <h2>Resume Audit</h2>
       <div class="score-badge">Recruiter Readability: <span id="scoreLabel">—</span></div>
     </div>
 
-    <!-- Issues -->
     <div class="card">
       <h3>⚠ What's Costing You Interviews</h3>
       <ul class="issue-list" id="issueList"></ul>
     </div>
 
-    <!-- 10-second test -->
     <div class="card">
       <h3>⚡ The 10-Second Scan Test</h3>
       <div class="content" id="tenSecondResult"></div>
     </div>
 
-    <!-- ATS Tips -->
     <div class="card">
       <h3>🤖 ATS & Parsing Notes</h3>
       <div class="content" id="atsResult"></div>
     </div>
 
-    <!-- Rewritten Resume -->
     <div class="card" style="padding: 0; overflow: visible; position: relative;">
       <div class="resume-output-label">Rewritten Resume</div>
       <div class="resume-output" id="revisedResume"></div>
@@ -455,7 +429,7 @@
 </div>
 
 <footer>
-  Built for <a href="#">Chance Create</a> · Career Reinvention Tools for Real People · Not generic advice.
+  Built for <a href="https://chancecreate.com">Chance Create</a> · Career Reinvention Tools for Real People · Not generic advice.
 </footer>
 
 <script>
@@ -464,7 +438,6 @@
   const fileNameEl = document.getElementById('fileName');
   let uploadedText = '';
 
-  // Drag and drop
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
   dropZone.addEventListener('drop', e => {
@@ -484,12 +457,9 @@
     if (file.type === 'text/plain') {
       uploadedText = await file.text();
     } else if (file.type === 'application/pdf') {
-      // Read as base64 for API
-      uploadedText = await readFileAsBase64(file);
-      uploadedText = '__PDF_BASE64__:' + uploadedText + ':__MIMETYPE__:application/pdf';
+      const base64 = await readFileAsBase64(file);
+      uploadedText = '__PDF_BASE64__:' + base64 + ':__MIMETYPE__:application/pdf';
     } else {
-      // For docx, read as base64
-      uploadedText = await readFileAsBase64(file);
       uploadedText = '__DOCX__:' + file.name;
     }
   }
@@ -503,15 +473,6 @@
     });
   }
 
-  function readFileAsText(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    });
-  }
-
   async function analyzeResume() {
     const pasteText = document.getElementById('resumeText').value.trim();
     const targetRole = document.getElementById('targetRole').value.trim();
@@ -520,6 +481,7 @@
     const errorBox = document.getElementById('errorBox');
 
     errorBox.classList.remove('active');
+    errorBox.textContent = '';
 
     const resumeContent = uploadedText || pasteText;
     if (!resumeContent) {
@@ -533,10 +495,8 @@
     document.getElementById('results').classList.remove('active');
 
     try {
-      // Build message content
       let messageContent = [];
 
-      // Handle PDF upload
       if (resumeContent.startsWith('__PDF_BASE64__:')) {
         const parts = resumeContent.split(':__MIMETYPE__:');
         const base64 = parts[0].replace('__PDF_BASE64__:', '');
@@ -550,7 +510,6 @@
           text: buildPrompt(null, targetRole, industry, focusNote)
         });
       } else if (resumeContent.startsWith('__DOCX__:')) {
-        // For DOCX, we can't parse binary natively - fallback message
         throw new Error('Word documents cannot be read directly. Please copy and paste your resume text into the text box instead.');
       } else {
         messageContent.push({
@@ -568,8 +527,14 @@
       });
 
       const data = await response.json();
-      document.getElementById('errorBox').textContent = 'DEBUG: ' + JSON.stringify(data).slice(0, 500);
-      document.getElementById('errorBox').classList.add('active');
+
+      if (data.error) {
+        throw new Error(typeof data.error === 'object' ? JSON.stringify(data.error) : data.error);
+      }
+
+      const raw = (data.content || []).map(c => c.text || '').join('');
+      if (!raw) throw new Error('Empty response from API. Please try again.');
+      parseAndDisplay(raw);
 
     } catch (err) {
       errorBox.textContent = err.message || 'Something went wrong. Please try again.';
@@ -580,67 +545,48 @@
     }
   }
 
-function buildPrompt(resumeText, targetRole, industry, focusNote) {
-  return `You are a recruiter with 8+ years at Fortune 500 companies. Audit this resume and respond ONLY with a JSON object — no markdown, no extra text.
+  function buildPrompt(resumeText, targetRole, industry, focusNote) {
+    return `You are a recruiter with 8+ years at Fortune 500 companies. Audit this resume and respond ONLY with a valid JSON object. No markdown. No explanation. No text before or after the JSON.
 
 RESUME:
-${resumeText ? resumeText.slice(0, 2000) : '[See uploaded PDF]'}
+${resumeText ? resumeText.slice(0, 2000) : '[See uploaded PDF above]'}
 
 TARGET ROLE: ${targetRole || 'Not specified'}
 INDUSTRY: ${industry || 'Not specified'}
-${focusNote ? `FOCUS: ${focusNote}` : ''}
+${focusNote ? 'FOCUS: ' + focusNote : ''}
 
-Respond with ONLY this JSON:
-{
-  "score": "Needs Work | Decent Foundation | Strong | Recruiter Ready",
-  "issues": [
-    {"type": "critical", "text": "issue description"},
-    {"type": "warning", "text": "issue description"},
-    {"type": "tip", "text": "issue description"}
-  ],
-  "tenSecondTest": "2-3 sentences on what a recruiter sees in 10 seconds",
-  "atsNotes": "2-3 sentences on ATS risks",
-  "revisedResume": "Full rewritten resume in plain text. Single column. Name and contact at top. Summary 2-3 lines. Each job: Company, Title, Dates then 3-4 bullets: Action Verb + What + Result. Skills section last. NO markdown."
-}`;
-}
+Return ONLY this JSON structure:
+{"score":"Needs Work","issues":[{"type":"critical","text":"example"},{"type":"warning","text":"example"},{"type":"tip","text":"example"}],"tenSecondTest":"What recruiter sees in 10 seconds.","atsNotes":"ATS risks and parsing issues.","revisedResume":"Full plain text resume here. Single column only. Name and contact top. 2-3 line summary. Each job has title, company, dates, then 3-4 bullets starting with action verbs showing impact. Skills last. No markdown symbols."}`;
+  }
 
-function parseAndDisplay(raw) {
+  function parseAndDisplay(raw) {
     try {
-      // Strip any markdown or extra text around the JSON
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-           document.getElementById('errorBox').textContent = 'RAW RESPONSE: ' + raw;
-           document.getElementById('errorBox').classList.add('active');
-        return;
-        }
-      // Score
-      document.getElementById('scoreLabel').textContent = data.score;
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found. Raw: ' + raw.slice(0, 300));
+      const data = JSON.parse(jsonMatch[0]);
 
-      // Issues
+      document.getElementById('scoreLabel').textContent = data.score || '—';
+
       const issueList = document.getElementById('issueList');
       issueList.innerHTML = '';
       (data.issues || []).forEach(issue => {
         const li = document.createElement('li');
-        li.className = `issue-item ${issue.type}`;
-        li.innerHTML = `<span class="issue-tag">${issue.type}</span><span>${issue.text}</span>`;
+        li.className = 'issue-item ' + (issue.type || 'tip');
+        li.innerHTML = '<span class="issue-tag">' + (issue.type || 'tip') + '</span><span>' + issue.text + '</span>';
         issueList.appendChild(li);
       });
 
-      // 10-second test
       document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
-
-      // ATS
       document.getElementById('atsResult').textContent = data.atsNotes || '';
-
-      // Revised resume
       document.getElementById('revisedResume').textContent = data.revisedResume || '';
 
       document.getElementById('results').classList.add('active');
       document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (e) {
-      document.getElementById('errorBox').textContent = 'Could not parse the response. Please try again.';
-      document.getElementById('errorBox').classList.add('active');
+      const errorBox = document.getElementById('errorBox');
+      errorBox.textContent = 'Parse error: ' + e.message;
+      errorBox.classList.add('active');
     }
   }
 
