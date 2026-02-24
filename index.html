@@ -723,8 +723,24 @@
   }
 
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    var text = resumeText.slice(0, 4000);
-    return 'You are a senior recruiter with 8+ years at JPMorgan Chase, Intuit, and TD Bank. Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\nRESUME:\n' + text + '\n\nTARGET ROLE: ' + (targetRole || 'Not specified') + '\nINDUSTRY: ' + (industry || 'Not specified') + '\n' + (focusNote ? 'SPECIAL FOCUS: ' + focusNote + '\n' : '') + '\nCRITICAL RULES:\n- List EVERY job role separately with exact title, company, dates, 3-4 bullets\n- NEVER combine roles or use placeholders like [continued]\n- Write the COMPLETE resume top to bottom\n- Use bullet character for all bullets\n- Section headers in ALL CAPS\n- Use \\n for line breaks\n\nReturn ONLY this JSON structure:\n{"score":"Needs Work","issues":[{"type":"critical","text":"issue"},{"type":"warning","text":"issue"},{"type":"tip","text":"tip"}],"tenSecondTest":"what recruiter sees in 10 seconds","atsNotes":"ATS risks","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n2-3 sentence summary\\n\\nEXPERIENCE\\n\\nCOMPANY\\nTitle | Location\\nDates\\nbullet\\nbullet\\n\\nSKILLS\\nCategory: skills"}';
+    var text = resumeText.slice(0, 4500);
+    var prompt = 'Audit this resume thoroughly and return ONLY a single valid JSON object. No markdown, no backticks, no extra text whatsoever.\n\n';
+    prompt += 'RESUME:\n' + text + '\n\n';
+    prompt += 'TARGET ROLE: ' + (targetRole || 'Not specified') + '\n';
+    prompt += 'INDUSTRY: ' + (industry || 'Not specified') + '\n';
+    if (focusNote) prompt += 'SPECIAL FOCUS: ' + focusNote + '\n';
+    prompt += '\nCRITICAL RESUME FORMAT RULES:\n';
+    prompt += '1. Group multiple roles at the same company under ONE company name header\n';
+    prompt += '   Format: COMPANY NAME\\nTitle | Location\\nDates\\n bullets\\n\\nTitle | Location\\nDates\\n bullets\n';
+    prompt += '2. NEVER repeat the company name before each role\n';
+    prompt += '3. Write EVERY role with real bullets - no placeholders, no [continued]\n';
+    prompt += '4. If no education found, write: EDUCATION\\nNot listed - recommend adding degree, school, graduation year\n';
+    prompt += '5. Use bullet character for all bullets\n';
+    prompt += '6. Section headers in ALL CAPS\n';
+    prompt += '7. Use \\n for ALL line breaks in JSON string values\n';
+    prompt += '\nReturn ONLY this exact JSON structure (no other text):\n';
+    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue and why"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt honest take on what a recruiter sees in 10 seconds","atsNotes":"Specific ATS risks found in this resume","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\nImpact-focused 2-3 sentence summary\\n\\nEXPERIENCE\\n\\nCOMPANY NAME\\nMost Recent Title | City, State\\nStart - End\\n• bullet with action verb and result\\n• bullet\\n\\nPrevious Title | City, State\\nStart - End\\n• bullet\\n• bullet\\n\\nSECOND COMPANY\\nTitle | City, State\\nStart - End\\n• bullet\\n\\nEDUCATION\\nDegree, School, Year\\n\\nSKILLS\\nCategory: skill1, skill2, skill3"}';
+    return prompt;
   }
 
   // EMAIL GATE
@@ -831,100 +847,200 @@
     var jsPDF = window.jspdf.jsPDF;
     var doc = new jsPDF({ unit: 'pt', format: 'letter' });
 
-    var marginX = 60, marginY = 60;
+    var marginX = 54;
+    var marginY = 54;
     var pageWidth = doc.internal.pageSize.getWidth();
     var pageHeight = doc.internal.pageSize.getHeight();
     var contentWidth = pageWidth - marginX * 2;
     var y = marginY;
-    var isFirstLine = true;
+
+    // Track context
+    var lineIndex = 0;
+    var inExperience = false;
+    var lastWasCompany = false;
+    var lastWasSectionHeader = false;
 
     function checkPage(needed) {
-      if (y + needed > pageHeight - marginY) { doc.addPage(); y = marginY; }
+      if (y + needed > pageHeight - marginY) {
+        doc.addPage();
+        y = marginY;
+      }
     }
+
+    function isAllCaps(str) {
+      return str.length >= 2 &&
+             str === str.toUpperCase() &&
+             /^[A-Z0-9\s&\/\-,\.]+$/.test(str) &&
+             /[A-Z]/.test(str);
+    }
+
+    function isDateLine(str) {
+      return /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{4})/i.test(str) ||
+             /\d{4}\s*[-–]\s*(Present|\d{4})/i.test(str);
+    }
+
+    function isRoleTitle(str) {
+      // Has | separator (Title | Location) or is a job title pattern
+      return str.includes('|') && str.length < 100;
+    }
+
+    function isBullet(str) {
+      return str.startsWith('•') || str.startsWith('-') || str.startsWith('·');
+    }
+
+    // Section headers known to reset context
+    var sectionHeaders = ['EXPERIENCE', 'EDUCATION', 'SKILLS', 'SUMMARY', 'CERTIFICATIONS', 'PROJECTS', 'AWARDS', 'VOLUNTEER', 'PUBLICATIONS'];
 
     lines.forEach(function(line, idx) {
       var trimmed = line.trim();
 
-      if (isFirstLine && trimmed) {
-        isFirstLine = false;
+      // ── NAME (first non-empty line) ──
+      if (lineIndex === 0 && trimmed) {
+        lineIndex++;
         doc.setFont('times', 'bold');
-        doc.setFontSize(18);
+        doc.setFontSize(20);
         doc.setTextColor(36, 36, 36);
-        checkPage(28);
+        checkPage(30);
         doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
-        y += 28;
+        y += 8;
+        // Thin accent line under name
+        doc.setDrawColor(155, 109, 187);
+        doc.setLineWidth(1.5);
+        doc.line(marginX + 40, y + 4, pageWidth - marginX - 40, y + 4);
+        y += 14;
         return;
       }
 
-      if (idx === 1 && trimmed) {
+      // ── CONTACT LINE (second non-empty line) ──
+      if (lineIndex === 1 && trimmed && !isBullet(trimmed)) {
+        lineIndex++;
         doc.setFont('times', 'normal');
         doc.setFontSize(9);
-        doc.setTextColor(100, 100, 100);
-        checkPage(16);
+        doc.setTextColor(110, 100, 95);
+        checkPage(14);
         doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
         y += 20;
         return;
       }
 
-      var isHeader = trimmed.length >= 3 && trimmed === trimmed.toUpperCase() && /^[A-Z\s&\/]+$/.test(trimmed);
-      if (isHeader) {
-        y += 14;
-        checkPage(22);
+      // ── EMPTY LINE ──
+      if (!trimmed) {
+        y += lastWasCompany ? 2 : 5;
+        lastWasCompany = false;
+        return;
+      }
+
+      lineIndex++;
+
+      // ── SECTION HEADERS (ALL CAPS known sections or all-caps short lines) ──
+      var isSectionHeader = sectionHeaders.some(function(s) { return trimmed === s; }) ||
+                            (isAllCaps(trimmed) && trimmed.length < 40 && !isDateLine(trimmed));
+
+      if (isSectionHeader) {
+        y += lastWasSectionHeader ? 6 : 14;
+        checkPage(24);
+        // Purple label
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(120, 70, 160);
         doc.text(trimmed, marginX, y);
+        // Full-width lavender rule
         doc.setDrawColor(206, 177, 221);
-        doc.setLineWidth(0.75);
-        doc.line(marginX, y + 3, pageWidth - marginX, y + 3);
+        doc.setLineWidth(0.6);
+        doc.line(marginX, y + 4, pageWidth - marginX, y + 4);
         y += 16;
-        doc.setTextColor(36, 36, 36);
+        inExperience = (trimmed === 'EXPERIENCE');
+        lastWasCompany = false;
+        lastWasSectionHeader = true;
         return;
       }
 
-      if (trimmed.startsWith('\u2022')) {
+      lastWasSectionHeader = false;
+
+      // ── COMPANY NAME (all-caps line in experience that isn't a date or section header) ──
+      if (inExperience && isAllCaps(trimmed) && !isDateLine(trimmed)) {
+        y += 10;
+        checkPage(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(36, 36, 36);
+        doc.text(trimmed, marginX, y);
+        y += 14;
+        lastWasCompany = true;
+        return;
+      }
+
+      // ── DATE LINE ──
+      if (isDateLine(trimmed)) {
+        checkPage(13);
+        doc.setFont('times', 'italic');
+        doc.setFontSize(9);
+        doc.setTextColor(120, 112, 105);
+        doc.text(trimmed, marginX + 10, y);
+        y += 13;
+        lastWasCompany = false;
+        return;
+      }
+
+      // ── ROLE TITLE (contains | separator) ──
+      if (isRoleTitle(trimmed)) {
+        var topPad = lastWasCompany ? 0 : 8;
+        y += topPad;
+        checkPage(15);
+        doc.setFont('times', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(36, 36, 36);
+        // Split title and location for right-alignment of location
+        var parts = trimmed.split('|');
+        var titlePart = parts[0].trim();
+        var locPart = parts.slice(1).join('|').trim();
+        doc.text(titlePart, marginX + 10, y);
+        if (locPart) {
+          doc.setFont('times', 'normal');
+          doc.setFontSize(9.5);
+          doc.setTextColor(120, 112, 105);
+          doc.text(locPart, pageWidth - marginX, y, { align: 'right' });
+        }
+        y += 14;
+        lastWasCompany = false;
+        return;
+      }
+
+      // ── BULLET ──
+      if (isBullet(trimmed)) {
+        var bulletText = trimmed.substring(1).trim();
         doc.setFont('times', 'normal');
         doc.setFontSize(10);
-        doc.setTextColor(36, 36, 36);
-        var bulletContent = trimmed.substring(1).trim();
-        var wrapped = doc.splitTextToSize(bulletContent, contentWidth - 18);
+        doc.setTextColor(50, 44, 40);
+        var wrapped = doc.splitTextToSize(bulletText, contentWidth - 22);
         wrapped.forEach(function(wline, i) {
-          checkPage(14);
-          if (i === 0) { doc.text('\u2022', marginX + 4, y); doc.text(wline, marginX + 14, y); }
-          else { doc.text(wline, marginX + 14, y); }
-          y += 14;
+          checkPage(13.5);
+          if (i === 0) {
+            doc.setTextColor(155, 109, 187);
+            doc.text('•', marginX + 10, y);
+            doc.setTextColor(50, 44, 40);
+            doc.text(wline, marginX + 20, y);
+          } else {
+            doc.text(wline, marginX + 20, y);
+          }
+          y += 13.5;
         });
-        y += 2;
+        y += 1.5;
+        lastWasCompany = false;
         return;
       }
 
-      if (!trimmed) { y += 6; return; }
-
-      if (trimmed.includes('|') && trimmed.length < 80) {
-        doc.setFont('times', 'bold');
-        doc.setFontSize(10);
-        doc.setTextColor(36, 36, 36);
-        checkPage(15);
-        doc.text(trimmed, marginX, y);
-        y += 15;
-        return;
-      }
-
-      if (/\d{4}\s*[-\u2013]\s*(Present|\d{4})/.test(trimmed)) {
-        doc.setFont('times', 'italic');
-        doc.setFontSize(9.5);
-        doc.setTextColor(100, 100, 100);
-        checkPage(14);
-        doc.text(trimmed, marginX, y);
-        y += 15;
-        return;
-      }
-
+      // ── EVERYTHING ELSE (paragraph text, skills, etc.) ──
       doc.setFont('times', 'normal');
       doc.setFontSize(10);
-      doc.setTextColor(36, 36, 36);
-      var wrappedText = doc.splitTextToSize(trimmed, contentWidth);
-      wrappedText.forEach(function(wline) { checkPage(14); doc.text(wline, marginX, y); y += 14; });
+      doc.setTextColor(50, 44, 40);
+      var wrapped = doc.splitTextToSize(trimmed, contentWidth);
+      wrapped.forEach(function(wline) {
+        checkPage(14);
+        doc.text(wline, marginX, y);
+        y += 14;
+      });
+      lastWasCompany = false;
     });
 
     doc.save(nameRaw + '_rewritten.pdf');
