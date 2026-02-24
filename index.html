@@ -606,10 +606,12 @@ Respond with ONLY this JSON:
 }`;
 }
 
-  function parseAndDisplay(raw) {
+function parseAndDisplay(raw) {
     try {
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const data = JSON.parse(clean);
+      // Strip any markdown or extra text around the JSON
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found in response');
+      const data = JSON.parse(jsonMatch[0]);
 
       // Score
       document.getElementById('scoreLabel').textContent = data.score;
