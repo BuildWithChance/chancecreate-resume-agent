@@ -3,8 +3,5 @@
   functions = "netlify/functions"
   command = "echo 'build complete'"
 
-[functions]
-  included_files = ["netlify/functions/**"]
-
 [functions."analyze"]
-  timeout = 60
+  timeout = 120
