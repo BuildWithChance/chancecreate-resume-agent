@@ -35,8 +35,8 @@ exports.handler = async function (event) {
     const body = JSON.parse(event.body);
     const payload = JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
-      system: "You are a resume auditor. Respond ONLY with a valid JSON object. No markdown. No backticks. No code fences. Use \\n for line breaks inside string values. All strings must be properly JSON-escaped. Never use unescaped quotes inside string values.",
+      max_tokens: 3000,
+      system: "You are an expert resume auditor with 8+ years recruiting at Fortune 500 companies. You respond ONLY with a valid JSON object. No markdown. No backticks. No code fences. No text before or after the JSON. Use \\n for line breaks inside string values. All strings must be properly JSON-escaped. Never use unescaped quotes inside string values.",
       messages: body.messages,
     });
 
