@@ -36,7 +36,6 @@
     align-items: center;
   }
 
-  /* ── HEADER ── */
   header {
     width: 100%;
     max-width: 800px;
@@ -68,7 +67,6 @@
     line-height: 1.75;
   }
 
-  /* ── MAIN ── */
   .main {
     width: 100%;
     max-width: 800px;
@@ -78,7 +76,6 @@
     gap: 20px;
   }
 
-  /* ── UPLOAD ── */
   .upload-zone {
     border: 2px dashed var(--border);
     border-radius: var(--radius);
@@ -113,7 +110,6 @@
   .file-status.success { color: var(--success); }
   .file-status.error { color: var(--danger); }
 
-  /* ── DIVIDER ── */
   .divider {
     display: flex;
     align-items: center;
@@ -131,7 +127,6 @@
     background: var(--border);
   }
 
-  /* ── FIELDS ── */
   .field { display: flex; flex-direction: column; gap: 7px; }
   .field label {
     font-size: 11px;
@@ -163,7 +158,6 @@
   }
   @media (max-width: 580px) { .field-row { grid-template-columns: 1fr; } }
 
-  /* ── BUTTON ── */
   .btn-primary {
     background: var(--accent-deep);
     color: #fff;
@@ -185,7 +179,6 @@
   .btn-primary:hover { background: #8559a8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(155,109,187,0.3); }
   .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* ── ERROR ── */
   .error-box {
     display: none;
     background: rgba(224,82,82,0.08);
@@ -198,7 +191,6 @@
   }
   .error-box.active { display: block; }
 
-  /* ── LOADING ── */
   .loading {
     display: none;
     text-align: center;
@@ -220,11 +212,9 @@
   .loading p { color: var(--muted); font-size: 14px; }
   .loading p strong { color: var(--text); }
 
-  /* ── RESULTS ── */
   .results { display: none; flex-direction: column; gap: 18px; }
   .results.active { display: flex; }
 
-  /* Score banner */
   .score-banner {
     border-radius: var(--radius);
     padding: 24px 28px;
@@ -244,6 +234,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
+    margin-bottom: 4px;
   }
   .score-value {
     font-family: 'Playfair Display', serif;
@@ -256,7 +247,6 @@
   .score-banner.needs-work .score-value { color: var(--danger); }
   .score-icon { font-size: 2.2rem; }
 
-  /* Cards */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -280,7 +270,6 @@
     color: #4a4440;
   }
 
-  /* Issue list */
   .issue-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
   .issue-item {
     display: flex;
@@ -312,7 +301,6 @@
   .issue-item.warning .issue-tag { background: rgba(201,122,58,0.12); color: var(--warn); }
   .issue-item.tip .issue-tag { background: rgba(122,171,138,0.12); color: var(--success); }
 
-  /* Resume output */
   .resume-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -353,19 +341,19 @@
     gap: 5px;
   }
   .btn-sm:hover { border-color: var(--accent-deep); color: var(--accent-deep); }
-  .btn-sm.copied { border-color: var(--success); color: var(--success); }
+  .btn-sm.success { border-color: var(--success); color: var(--success); }
+
   .resume-output {
     padding: 40px 44px;
     font-family: 'Times New Roman', Georgia, serif;
     font-size: 10.5pt;
-    line-height: 1.55;
+    line-height: 1.6;
     color: #1a1a1a;
     white-space: pre-wrap;
     word-break: break-word;
   }
   @media (max-width: 580px) { .resume-output { padding: 24px 20px; } }
 
-  /* Reset */
   .btn-reset {
     background: transparent;
     border: 1.5px solid var(--border);
@@ -403,7 +391,6 @@
 
 <div class="main">
 
-  <!-- Upload -->
   <div class="upload-zone" id="dropZone">
     <input type="file" id="fileInput" accept=".pdf,.txt">
     <div class="upload-icon">📄</div>
@@ -441,17 +428,14 @@
     Audit My Resume →
   </button>
 
-  <!-- Loading -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p><strong>Reading your resume like a recruiter would…</strong></p>
-    <p style="margin-top:6px;">This takes about 15–20 seconds.</p>
+    <p style="margin-top:6px;">This takes about 20–30 seconds.</p>
   </div>
 
-  <!-- Results -->
   <div class="results" id="results">
 
-    <!-- Score -->
     <div class="score-banner" id="scoreBanner">
       <div>
         <div class="score-label">Recruiter Readability Score</div>
@@ -460,25 +444,21 @@
       <div class="score-icon" id="scoreIcon">—</div>
     </div>
 
-    <!-- Issues -->
     <div class="card">
       <div class="card-title">⚠ What's Costing You Interviews</div>
       <ul class="issue-list" id="issueList"></ul>
     </div>
 
-    <!-- 10 second -->
     <div class="card">
       <div class="card-title">⚡ The 10-Second Scan Test</div>
       <div class="card-body" id="tenSecondResult"></div>
     </div>
 
-    <!-- ATS -->
     <div class="card">
       <div class="card-title">🤖 ATS & Parsing Notes</div>
       <div class="card-body" id="atsResult"></div>
     </div>
 
-    <!-- Rewritten resume -->
     <div class="resume-wrap">
       <div class="resume-wrap-header">
         <span>✦ Rewritten Resume</span>
@@ -505,7 +485,6 @@
   const fileStatus = document.getElementById('fileStatus');
   let uploadedText = '';
 
-  // Drag and drop
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
   dropZone.addEventListener('drop', e => {
@@ -614,17 +593,26 @@
   }
 
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    return `You are a senior recruiter with 8+ years at JPMorgan Chase, Intuit, and TD Bank. Audit this resume and return ONLY a valid JSON object with no markdown, no backticks, no extra text.
+    return `You are a senior recruiter with 8+ years at JPMorgan Chase, Intuit, and TD Bank. Audit this resume thoroughly and return ONLY a single valid JSON object — no markdown, no backticks, no extra text whatsoever.
 
-RESUME (first 3000 chars):
-${resumeText.slice(0, 3000)}
+RESUME:
+${resumeText.slice(0, 4000)}
 
 TARGET ROLE: ${targetRole || 'Not specified'}
 INDUSTRY: ${industry || 'Not specified'}
 ${focusNote ? 'SPECIAL FOCUS: ' + focusNote : ''}
 
-Return ONLY this JSON (use \\n for line breaks in strings, escape all quotes):
-{"score":"Needs Work","issues":[{"type":"critical","text":"Specific issue and why it matters to a recruiter"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Exactly what a recruiter sees and thinks in the first 10 seconds. Be blunt and specific.","atsNotes":"Specific ATS parsing risks: columns, tables, headers, fonts, missing keywords, date formats, special characters.","revisedResume":"FULL rewritten resume in clean plain text.\\n\\nRules:\\n- Single column, no tables\\n- Name and contact info on first line\\n- Leave one blank line between sections\\n- Section headers in ALL CAPS\\n- SUMMARY section: 2-3 sentences, impact-focused\\n- EXPERIENCE: Company name, then Title | Location on next line, then dates, then 3-4 bullets starting with strong action verbs showing measurable impact\\n- SKILLS section: grouped by category\\n- Write the COMPLETE resume - do not abbreviate or use placeholders\\n- No markdown symbols, no asterisks, no dashes as bullets - use bullet character •"}`;
+CRITICAL RULES FOR THE REWRITE:
+- List EVERY job role separately with its exact title, company, dates, and 3-4 bullet points
+- NEVER combine multiple roles into one entry
+- NEVER use placeholder text like "[continued]" or "[additional roles]"
+- Write the COMPLETE resume from top to bottom
+- Use bullet character • for all bullets
+- Section headers must be plain ALL CAPS text (no symbols)
+- Use \\n for line breaks, escape all quotes with backslash
+
+Return ONLY this JSON:
+{"score":"Needs Work","issues":[{"type":"critical","text":"Specific issue and why it matters"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Exactly what a recruiter sees and thinks in the first 10 seconds. Be direct and specific.","atsNotes":"Specific ATS risks: columns, tables, special characters, missing keywords, date formats.","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n2-3 sentence impact-focused summary with certifications and years of experience.\\n\\nEXPERIENCE\\n\\nCOMPANY NAME\\nJob Title | City, State\\nStart Year - End Year\\n• Action verb + what you did + measurable result\\n• Action verb + what you did + measurable result\\n• Action verb + what you did + measurable result\\n\\n[repeat for EVERY role individually]\\n\\nEDUCATION\\nDegree, School, Year\\n\\nSKILLS\\nCategory: skill1, skill2, skill3"}`;
   }
 
   function parseAndDisplay(raw) {
@@ -652,11 +640,10 @@ Return ONLY this JSON (use \\n for line breaks in strings, escape all quotes):
         issueList.appendChild(li);
       });
 
-      // Text sections
       document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
       document.getElementById('atsResult').textContent = data.atsNotes || '';
 
-      // Resume — convert literal \n to real line breaks
+      // Resume — convert escaped \n to real line breaks
       const resumeText = (data.revisedResume || '').replace(/\\n/g, '\n');
       document.getElementById('revisedResume').textContent = resumeText;
 
@@ -677,89 +664,164 @@ Return ONLY this JSON (use \\n for line breaks in strings, escape all quotes):
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.getElementById('copyBtn');
       btn.textContent = '✓ Copied!';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2500);
+      btn.classList.add('success');
+      setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('success'); }, 2500);
     });
   }
 
   function downloadResume() {
     const text = document.getElementById('revisedResume').textContent;
-    const name = text.split('\n')[0].trim().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_') || 'resume';
+    const lines = text.split('\n');
+    const nameRaw = lines[0].trim().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_') || 'resume';
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
 
-    const margin = 56;
+    const marginX = 60;
+    const marginY = 60;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const maxWidth = pageWidth - margin * 2;
-    const lineHeight = 14;
-    let y = margin;
+    const contentWidth = pageWidth - marginX * 2;
+    let y = marginY;
     let isFirstLine = true;
 
-    const lines = text.split('\n');
+    function checkPage(needed) {
+      if (y + needed > pageHeight - marginY) {
+        doc.addPage();
+        y = marginY;
+      }
+    }
 
-    lines.forEach(line => {
+    lines.forEach((line, idx) => {
       const trimmed = line.trim();
 
-      // Name (very first non-empty line)
+      // ── Name (first non-empty line)
       if (isFirstLine && trimmed) {
         isFirstLine = false;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.setTextColor(26, 26, 26);
-        doc.text(trimmed, margin, y);
-        y += 22;
+        doc.setFont('times', 'bold');
+        doc.setFontSize(18);
+        doc.setTextColor(36, 36, 36);
+        checkPage(28);
+        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
+        y += 28;
+        return;
       }
-      // Section headers: ALL CAPS, no numbers, no @
-      else if (trimmed && trimmed === trimmed.toUpperCase() && trimmed.length > 2 && !/[0-9@|]/.test(trimmed)) {
-        y += 8;
+
+      // ── Contact line (line 2, contains | or @ or phone pattern)
+      if (idx === 1 && trimmed) {
+        doc.setFont('times', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        checkPage(16);
+        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
+        y += 20;
+        return;
+      }
+
+      // ── Section headers: ALL CAPS, no numbers, no special chars, min 3 chars
+      const isHeader = trimmed.length >= 3
+        && trimmed === trimmed.toUpperCase()
+        && /^[A-Z\s&\/]+$/.test(trimmed);
+
+      if (isHeader) {
+        y += 14; // space above header
+        checkPage(22);
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9.5);
-        doc.setTextColor(100, 60, 140);
-        doc.text(trimmed, margin, y);
+        doc.setFontSize(9);
+        doc.setTextColor(120, 70, 160);
+        doc.text(trimmed, marginX, y);
+        // Underline rule
         doc.setDrawColor(206, 177, 221);
-        doc.setLineWidth(0.5);
-        doc.line(margin, y + 3, pageWidth - margin, y + 3);
-        y += lineHeight + 4;
-        doc.setTextColor(26, 26, 26);
+        doc.setLineWidth(0.75);
+        doc.line(marginX, y + 3, pageWidth - marginX, y + 3);
+        y += 16;
+        doc.setTextColor(36, 36, 36);
+        return;
       }
-      // Bullet points
-      else if (trimmed.startsWith('\u2022') || trimmed.startsWith('* ')) {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9.5);
-        doc.setTextColor(26, 26, 26);
-        const bulletText = trimmed.replace(/^[\u2022\*]\s*/, '');
-        const wrapped = doc.splitTextToSize('\u2022  ' + bulletText, maxWidth - 14);
+
+      // ── Bullet points
+      if (trimmed.startsWith('•')) {
+        doc.setFont('times', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(36, 36, 36);
+        const bulletContent = trimmed.substring(1).trim();
+        const wrapped = doc.splitTextToSize(bulletContent, contentWidth - 18);
         wrapped.forEach((wline, i) => {
-          if (y + lineHeight > pageHeight - margin) { doc.addPage(); y = margin; }
-          doc.text(wline, margin + (i === 0 ? 0 : 10), y);
-          y += lineHeight;
+          checkPage(14);
+          if (i === 0) {
+            doc.text('•', marginX + 4, y);
+            doc.text(wline, marginX + 14, y);
+          } else {
+            doc.text(wline, marginX + 14, y);
+          }
+          y += 14;
         });
+        y += 2;
+        return;
       }
-      // Empty line — small gap
-      else if (!trimmed) {
-        y += lineHeight * 0.45;
+
+      // ── Empty line
+      if (!trimmed) {
+        y += 6;
+        return;
       }
-      // Normal text
-      else {
-        doc.setFont('helvetica', 'normal');
+
+      // ── Job title / company / date lines (bold if short and no bullets)
+      const isJobLine = trimmed.length < 80 && (
+        trimmed.includes('|') ||
+        /\d{4}/.test(trimmed) ||
+        trimmed === trimmed.toUpperCase().replace(/[^A-Z\s]/g, '') + trimmed.replace(/[A-Z\s]/g, '')
+      );
+
+      if (isJobLine && trimmed.includes('|')) {
+        doc.setFont('times', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(36, 36, 36);
+        checkPage(15);
+        doc.text(trimmed, marginX, y);
+        y += 15;
+        return;
+      }
+
+      if (isJobLine && /^\d{4}/.test(trimmed) || /\d{4}\s*[-–]\s*(Present|\d{4})/.test(trimmed)) {
+        doc.setFont('times', 'italic');
         doc.setFontSize(9.5);
-        doc.setTextColor(26, 26, 26);
-        const wrapped = doc.splitTextToSize(trimmed, maxWidth);
-        wrapped.forEach(wline => {
-          if (y + lineHeight > pageHeight - margin) { doc.addPage(); y = margin; }
-          doc.text(wline, margin, y);
-          y += lineHeight;
-        });
+        doc.setTextColor(100, 100, 100);
+        checkPage(14);
+        doc.text(trimmed, marginX, y);
+        y += 15;
+        return;
       }
+
+      // ── Company name lines (short, no special chars, bold)
+      if (trimmed.length < 50 && !trimmed.includes(',') && idx > 2) {
+        doc.setFont('times', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(36, 36, 36);
+        checkPage(16);
+        doc.text(trimmed, marginX, y);
+        y += 16;
+        return;
+      }
+
+      // ── Normal paragraph text
+      doc.setFont('times', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(36, 36, 36);
+      const wrapped = doc.splitTextToSize(trimmed, contentWidth);
+      wrapped.forEach(wline => {
+        checkPage(14);
+        doc.text(wline, marginX, y);
+        y += 14;
+      });
     });
 
-    doc.save(name + '_rewritten.pdf');
+    doc.save(nameRaw + '_rewritten.pdf');
 
     const btn = document.getElementById('downloadBtn');
-    btn.textContent = '\u2713 Downloaded!';
-    setTimeout(() => btn.textContent = '\u2193 Download PDF', 2500);
+    btn.textContent = '✓ Downloaded!';
+    btn.classList.add('success');
+    setTimeout(() => { btn.textContent = '⬇ Download PDF'; btn.classList.remove('success'); }, 2500);
   }
 
   function resetForm() {
