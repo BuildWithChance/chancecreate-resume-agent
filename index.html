@@ -724,22 +724,37 @@
 
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
     var text = resumeText.slice(0, 4500);
-    var prompt = 'Audit this resume thoroughly and return ONLY a single valid JSON object. No markdown, no backticks, no extra text whatsoever.\n\n';
+    var prompt = 'Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\n';
     prompt += 'RESUME:\n' + text + '\n\n';
     prompt += 'TARGET ROLE: ' + (targetRole || 'Not specified') + '\n';
     prompt += 'INDUSTRY: ' + (industry || 'Not specified') + '\n';
     if (focusNote) prompt += 'SPECIAL FOCUS: ' + focusNote + '\n';
-    prompt += '\nCRITICAL RESUME FORMAT RULES:\n';
-    prompt += '1. Group multiple roles at the same company under ONE company name header\n';
-    prompt += '   Format: COMPANY NAME\\nTitle | Location\\nDates\\n bullets\\n\\nTitle | Location\\nDates\\n bullets\n';
-    prompt += '2. NEVER repeat the company name before each role\n';
-    prompt += '3. Write EVERY role with real bullets - no placeholders, no [continued]\n';
-    prompt += '4. If no education found, write: EDUCATION\\nNot listed - recommend adding degree, school, graduation year\n';
-    prompt += '5. Use bullet character for all bullets\n';
-    prompt += '6. Section headers in ALL CAPS\n';
-    prompt += '7. Use \\n for ALL line breaks in JSON string values\n';
-    prompt += '\nReturn ONLY this exact JSON structure (no other text):\n';
-    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue and why"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt honest take on what a recruiter sees in 10 seconds","atsNotes":"Specific ATS risks found in this resume","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\nImpact-focused 2-3 sentence summary\\n\\nEXPERIENCE\\n\\nCOMPANY NAME\\nMost Recent Title | City, State\\nStart - End\\n• bullet with action verb and result\\n• bullet\\n\\nPrevious Title | City, State\\nStart - End\\n• bullet\\n• bullet\\n\\nSECOND COMPANY\\nTitle | City, State\\nStart - End\\n• bullet\\n\\nEDUCATION\\nDegree, School, Year\\n\\nSKILLS\\nCategory: skill1, skill2, skill3"}';
+    prompt += '\nCRITICAL RULES — follow exactly:\n';
+    prompt += '\n1. COMPANY GROUPING\n';
+    prompt += '   - Group all roles at the same company under ONE company name\n';
+    prompt += '   - NEVER repeat the company name between roles\n';
+    prompt += '   - Format strictly: COMPANY NAME\\nTitle | City, State\\nStart – End\\n• bullet\\n\\nNext Title | City, State\\nStart – End\\n• bullet\n';
+    prompt += '\n2. ROLE TITLE FORMAT\n';
+    prompt += '   - ALWAYS use a pipe character | between the job title and location\n';
+    prompt += '   - Example: Customer Success Manager | Tampa, FL\n';
+    prompt += '   - NEVER write the title and location without the | separator\n';
+    prompt += '\n3. DATES\n';
+    prompt += '   - Always use an en dash: 2022 – 2024, not 2022 - 2024\n';
+    prompt += '   - Current role: 2024 – Present\n';
+    prompt += '\n4. OLDER / EARLY CAREER ROLES\n';
+    prompt += '   - If the resume has vague older experience (e.g. "Earlier Roles 2008-2017"), do NOT fabricate bullets\n';
+    prompt += '   - Instead write: [Earlier roles noted on original resume but not detailed — candidate should add specific titles, companies, and accomplishments for roles prior to YEAR]\n';
+    prompt += '   - Flag this in the issues array as a warning\n';
+    prompt += '\n5. EDUCATION\n';
+    prompt += '   - If no education is found, write: Not listed — add your degree, school, and graduation year\n';
+    prompt += '   - Flag this in the issues array as a warning\n';
+    prompt += '\n6. GENERAL\n';
+    prompt += '   - Section headers in ALL CAPS\n';
+    prompt += '   - Use • for all bullets\n';
+    prompt += '   - Use \\n for ALL line breaks inside JSON string values\n';
+    prompt += '   - Use – (en dash) not - (hyphen) for date ranges\n';
+    prompt += '\nReturn ONLY this JSON (no other text before or after):\n';
+    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue and why it matters"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt honest recruiter take on the first 10 seconds","atsNotes":"Specific ATS risks in this resume","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n2-3 sentence impact-focused summary\\n\\nEXPERIENCE\\n\\nCOMPANY NAME\\nMost Recent Title | City, State\\n2024 – Present\\n• bullet\\n• bullet\\n\\nPrevious Title | City, State\\n2022 – 2024\\n• bullet\\n• bullet\\n\\nSECOND COMPANY\\nTitle | City, State\\n2019 – 2022\\n• bullet\\n\\nEDUCATION\\nDegree, School, Year\\n\\nSKILLS\\nCategory: skill1, skill2, skill3"}';
     return prompt;
   }
 
