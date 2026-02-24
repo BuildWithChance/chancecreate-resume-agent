@@ -571,7 +571,8 @@
       if (data.error) throw new Error(data.error.message);
 
       const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-      const raw = (parsed.content || parsed).map(c => c.text || '').join('');
+      console.log('API RESPONSE:', JSON.stringify(parsed));
+      const raw = (parsed.content || []).map(c => c.text || '').join('');
       parseAndDisplay(raw);
 
     } catch (err) {
