@@ -568,10 +568,8 @@
       });
 
       const data = await response.json();
-      if (data.error) throw new Error(data.error.message);
-
-      const raw = (data.content || []).map(c => c.text || '').join('');
-      parseAndDisplay(raw);
+      document.getElementById('errorBox').textContent = 'DEBUG: ' + JSON.stringify(data).slice(0, 500);
+      document.getElementById('errorBox').classList.add('active');
 
     } catch (err) {
       errorBox.textContent = err.message || 'Something went wrong. Please try again.';
