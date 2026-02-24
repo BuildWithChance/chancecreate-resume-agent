@@ -39,14 +39,16 @@ exports.handler = async function (event) {
 You respond ONLY with a single valid JSON object. No markdown, no backticks, no text before or after the JSON.
 Use \\n for line breaks inside string values. Escape all special characters properly.
 
-RESUME FORMATTING RULES (follow exactly):
-- If someone held multiple roles at the same company, list the company name ONCE, then list each role underneath it
-- Format: COMPANY NAME\\nRole Title | City, State\\nDates\\n• bullet\\n• bullet\\n\\nRole Title | City, State\\nDates\\n• bullet
-- NEVER repeat the company name before each role - group them together
-- Write the COMPLETE resume - every single role with real bullets, no placeholders
-- If education is not in the resume, include a note: EDUCATION\\nNot listed — recommend adding degree, school, and graduation year
+FORMATTING RULES — follow every single one:
+- Group multiple roles at the same company under ONE company name. NEVER repeat the company name between roles.
+- ALWAYS use a pipe | between job title and location: "Customer Success Manager | Tampa, FL"
+- NEVER write a title and location without the | separator
+- Use en dash for ALL date ranges: 2022 – 2024 not 2022 - 2024. Current role: 2024 – Present
+- If older roles are vague or undescribed, do NOT fabricate bullets. Write: [Earlier roles noted but not detailed — candidate should add specific titles, companies, and accomplishments]
+- If no education found: write "Not listed — add your degree, school, and graduation year" and flag as a warning issue
 - Section headers in ALL CAPS
-- Use bullet character • for all bullets`,
+- Use bullet character • for all bullets
+- Write the COMPLETE resume with real bullets for every role that has detail`,
       messages: body.messages,
     });
 
