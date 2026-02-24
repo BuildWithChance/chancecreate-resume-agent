@@ -582,31 +582,29 @@
     }
   }
 
-  function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    return `You are Ashley's AI Resume Audit Agent for Chance Create — a career reinvention consultancy. You think like a senior recruiter with 8+ years inside Fortune 500 companies. You know what gets resumes ignored and what gets them opened.
+function buildPrompt(resumeText, targetRole, industry, focusNote) {
+  return `You are a recruiter with 8+ years at Fortune 500 companies. Audit this resume and respond ONLY with a JSON object — no markdown, no extra text.
 
-Your job: audit this resume HARD, then rewrite it so it passes ATS and passes the 10-second recruiter scan test.
+RESUME:
+${resumeText ? resumeText.slice(0, 2000) : '[See uploaded PDF]'}
 
-${resumeText ? `RESUME TEXT:\n${resumeText}` : '[Resume was uploaded as a PDF — analyze the full content above]'}
+TARGET ROLE: ${targetRole || 'Not specified'}
+INDUSTRY: ${industry || 'Not specified'}
+${focusNote ? `FOCUS: ${focusNote}` : ''}
 
-${targetRole ? `TARGET ROLE: ${targetRole}` : ''}
-${industry ? `INDUSTRY: ${industry}` : ''}
-${focusNote ? `SPECIAL FOCUS: ${focusNote}` : ''}
-
-Respond ONLY with a valid JSON object in this exact format (no markdown, no explanation outside the JSON):
-
+Respond with ONLY this JSON:
 {
   "score": "Needs Work | Decent Foundation | Strong | Recruiter Ready",
   "issues": [
-    { "type": "critical", "text": "Issue description and why it matters" },
-    { "type": "warning", "text": "..." },
-    { "type": "tip", "text": "..." }
+    {"type": "critical", "text": "issue description"},
+    {"type": "warning", "text": "issue description"},
+    {"type": "tip", "text": "issue description"}
   ],
-  "tenSecondTest": "What a recruiter sees in the first 10 seconds scanning this resume — be blunt about what's working and what's not. Call out if the summary, job titles, or bullet structure are helping or hurting.",
-  "atsNotes": "Specific notes on ATS parsing risks: formatting issues, missing keywords, graphics, tables, columns, header/footer data, non-standard fonts. Be concrete.",
-  "revisedResume": "The full rewritten resume here. Rules for the rewrite:\\n- Clean single-column layout, no tables or columns\\n- Name and contact info at the top, clearly formatted\\n- Professional Summary: 2-3 lines MAX, specific, impact-led\\n- Work Experience: each role has company, title, dates (right-aligned), then 3-5 bullet points using this format: [Action Verb] + [What You Did] + [Result/Impact with metric if possible]\\n- No objectives, no 'references available upon request'\\n- Skills section: relevant keywords only, comma-separated or grouped by category\\n- Education last (unless recent grad)\\n- Use plain text formatting only — NO markdown bold/italic, just CAPS for section headers\\n- Write the whole resume in clean plain text, ready to paste directly into a Word doc or application form"
+  "tenSecondTest": "2-3 sentences on what a recruiter sees in 10 seconds",
+  "atsNotes": "2-3 sentences on ATS risks",
+  "revisedResume": "Full rewritten resume in plain text. Single column. Name and contact at top. Summary 2-3 lines. Each job: Company, Title, Dates then 3-4 bullets: Action Verb + What + Result. Skills section last. NO markdown."
 }`;
-  }
+}
 
   function parseAndDisplay(raw) {
     try {
