@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Revision Agent – Chance Create</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #fffbf5;
+    --surface: #ffffff;
+    --surface2: #f4ecf8;
+    --accent: #ceb1dd;
+    --accent2: #95897a;
+    --text: #242424;
+    --muted: #95897a;
+    --border: #e8e0f0;
+    --success: #7aab8a;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    max-width: 860px;
+    padding: 48px 24px 24px;
+    text-align: center;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #9b6dbb;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1 span { color: #9b6dbb; }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+
+  .main {
+    width: 100%;
+    max-width: 860px;
+    padding: 0 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Upload Zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: #ceb1dd;
+    background: rgba(206,177,221,0.06);
+  }
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 36px; margin-bottom: 12px; }
+  .upload-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .upload-zone p { font-size: 13px; color: var(--muted); }
+  .upload-zone .file-name {
+    margin-top: 14px;
+    font-size: 13px;
+    color: #9b6dbb;
+    font-weight: 500;
+    display: none;
+  }
+
+  /* Target Role Input */
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 600px) { .field-group { grid-template-columns: 1fr; } }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field input, .field select, .field textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    outline: none;
+    resize: vertical;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: #ceb1dd;
+  }
+  .field select option { background: var(--surface2); }
+
+  /* Paste zone */
+  .paste-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .paste-divider::before, .paste-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CTA Button */
+  .btn-analyze {
+    background: #ceb1dd;
+    color: #242424;
+    border: none;
+    border-radius: 8px;
+    padding: 16px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    width: 100%;
+  }
+  .btn-analyze:hover { background: #bfa0cc; transform: translateY(-1px); }
+  .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Loading */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 48px;
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+  .loading.active { display: block; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { color: var(--muted); font-size: 14px; }
+
+  /* Results */
+  .results {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .results.active { display: flex; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .result-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+  }
+  .score-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .score-badge span { color: #9b6dbb; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+  .card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #9b6dbb;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card .content {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #4a4440;
+    white-space: pre-wrap;
+  }
+
+  /* Issue list */
+  .issue-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .issue-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #faf6ff;
+    border-radius: 8px;
+    border-left: 3px solid var(--border);
+    font-size: 14px;
+    line-height: 1.6;
+    color: #242424;
+  }
+  .issue-item.critical { border-left-color: #e05252; }
+  .issue-item.warning { border-left-color: var(--accent2); }
+  .issue-item.tip { border-left-color: var(--success); }
+  .issue-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .issue-item.critical .issue-tag { background: rgba(224,82,82,0.15); color: #e05252; }
+  .issue-item.warning .issue-tag { background: rgba(201,122,58,0.15); color: var(--accent2); }
+  .issue-item.tip .issue-tag { background: rgba(90,158,111,0.15); color: var(--success); }
+
+  /* Revised resume output */
+  .resume-output {
+    background: #fff;
+    color: #1a1a1a;
+    border-radius: var(--radius);
+    padding: 48px;
+    font-family: 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    position: relative;
+  }
+  .resume-output-label {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background: #ceb1dd;
+    color: #242424;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 100px;
+  }
+
+  .copy-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 16px;
+  }
+  .copy-btn:hover { border-color: #9b6dbb; color: #9b6dbb; }
+
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: center;
+    margin-top: 8px;
+  }
+  .reset-btn:hover { border-color: #242424; color: #242424; }
+
+  .error-box {
+    display: none;
+    background: rgba(224,82,82,0.1);
+    border: 1px solid rgba(224,82,82,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #e88;
+  }
+  .error-box.active { display: block; }
+
+  footer {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    width: 100%;
+    max-width: 860px;
+  }
+  footer a { color: #9b6dbb; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Chance Create · Career Reinvention Tools</p>
+  <h1>Your Resume Should<br><span>Open Doors in 10 Seconds.</span></h1>
+  <p class="subtitle">Upload your resume and get a recruiter's-eye critique plus a rewritten version that's ATS-friendly, impact-led, and easy to scan in under 10 seconds.</p>
+</header>
+
+<div class="main">
+
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt">
+    <div class="upload-icon">📄</div>
+    <h3>Drop your resume here or click to upload</h3>
+    <p>PDF, Word (.docx), or plain text — max 5MB</p>
+    <p class="file-name" id="fileName"></p>
+  </div>
+
+  <!-- OR paste -->
+  <div class="paste-divider">or paste your resume text below</div>
+
+  <div class="field">
+    <label>Paste Resume Text</label>
+    <textarea id="resumeText" placeholder="Paste your full resume here if you prefer not to upload a file..." rows="6"></textarea>
+  </div>
+
+  <!-- Target info -->
+  <div class="field-group">
+    <div class="field">
+      <label>Target Role / Job Title</label>
+      <input type="text" id="targetRole" placeholder="e.g. Mainframe Systems Programmer">
+    </div>
+    <div class="field">
+      <label>Industry / Sector</label>
+      <input type="text" id="industry" placeholder="e.g. Financial Technology, Healthcare">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Anything specific you want flagged or improved? (optional)</label>
+    <input type="text" id="focusNote" placeholder="e.g. career gap, pivot from non-tech, ATS rejections">
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <button class="btn-analyze" id="analyzeBtn" onclick="analyzeResume()">
+    Analyze & Rewrite My Resume →
+  </button>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Reading your resume the way a recruiter would…</p>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <div class="result-header">
+      <h2>Resume Audit</h2>
+      <div class="score-badge">Recruiter Readability: <span id="scoreLabel">—</span></div>
+    </div>
+
+    <!-- Issues -->
+    <div class="card">
+      <h3>⚠ What's Costing You Interviews</h3>
+      <ul class="issue-list" id="issueList"></ul>
+    </div>
+
+    <!-- 10-second test -->
+    <div class="card">
+      <h3>⚡ The 10-Second Scan Test</h3>
+      <div class="content" id="tenSecondResult"></div>
+    </div>
+
+    <!-- ATS Tips -->
+    <div class="card">
+      <h3>🤖 ATS & Parsing Notes</h3>
+      <div class="content" id="atsResult"></div>
+    </div>
+
+    <!-- Rewritten Resume -->
+    <div class="card" style="padding: 0; overflow: visible; position: relative;">
+      <div class="resume-output-label">Rewritten Resume</div>
+      <div class="resume-output" id="revisedResume"></div>
+      <div style="padding: 0 28px 28px;">
+        <button class="copy-btn" onclick="copyResume()">Copy Rewritten Resume</button>
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetForm()">← Start Over with a New Resume</button>
+  </div>
+
+</div>
+
+<footer>
+  Built for <a href="#">Chance Create</a> · Career Reinvention Tools for Real People · Not generic advice.
+</footer>
+
+<script>
+  const fileInput = document.getElementById('fileInput');
+  const dropZone = document.getElementById('dropZone');
+  const fileNameEl = document.getElementById('fileName');
+  let uploadedText = '';
+
+  // Drag and drop
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+  });
+
+  async function handleFile(file) {
+    fileNameEl.style.display = 'block';
+    fileNameEl.textContent = '📎 ' + file.name;
+    if (file.type === 'text/plain') {
+      uploadedText = await file.text();
+    } else if (file.type === 'application/pdf') {
+      // Read as base64 for API
+      uploadedText = await readFileAsBase64(file);
+      uploadedText = '__PDF_BASE64__:' + uploadedText + ':__MIMETYPE__:application/pdf';
+    } else {
+      // For docx, read as base64
+      uploadedText = await readFileAsBase64(file);
+      uploadedText = '__DOCX__:' + file.name;
+    }
+  }
+
+  function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }
+
+  async function analyzeResume() {
+    const pasteText = document.getElementById('resumeText').value.trim();
+    const targetRole = document.getElementById('targetRole').value.trim();
+    const industry = document.getElementById('industry').value.trim();
+    const focusNote = document.getElementById('focusNote').value.trim();
+    const errorBox = document.getElementById('errorBox');
+
+    errorBox.classList.remove('active');
+
+    const resumeContent = uploadedText || pasteText;
+    if (!resumeContent) {
+      errorBox.textContent = 'Please upload a resume file or paste your resume text before analyzing.';
+      errorBox.classList.add('active');
+      return;
+    }
+
+    document.getElementById('analyzeBtn').disabled = true;
+    document.getElementById('loading').classList.add('active');
+    document.getElementById('results').classList.remove('active');
+
+    try {
+      // Build message content
+      let messageContent = [];
+
+      // Handle PDF upload
+      if (resumeContent.startsWith('__PDF_BASE64__:')) {
+        const parts = resumeContent.split(':__MIMETYPE__:');
+        const base64 = parts[0].replace('__PDF_BASE64__:', '');
+        const mimeType = parts[1];
+        messageContent.push({
+          type: 'document',
+          source: { type: 'base64', media_type: mimeType, data: base64 }
+        });
+        messageContent.push({
+          type: 'text',
+          text: buildPrompt(null, targetRole, industry, focusNote)
+        });
+      } else if (resumeContent.startsWith('__DOCX__:')) {
+        // For DOCX, we can't parse binary natively - fallback message
+        throw new Error('Word documents cannot be read directly. Please copy and paste your resume text into the text box instead.');
+      } else {
+        messageContent.push({
+          type: 'text',
+          text: buildPrompt(resumeContent, targetRole, industry, focusNote)
+        });
+      }
+
+      const response = await fetch('/.netlify/functions/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: messageContent }]
+        })
+      });
+
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message);
+
+      const raw = data.content.map(c => c.text || '').join('');
+      parseAndDisplay(raw);
+
+    } catch (err) {
+      errorBox.textContent = err.message || 'Something went wrong. Please try again.';
+      errorBox.classList.add('active');
+    } finally {
+      document.getElementById('analyzeBtn').disabled = false;
+      document.getElementById('loading').classList.remove('active');
+    }
+  }
+
+  function buildPrompt(resumeText, targetRole, industry, focusNote) {
+    return `You are Ashley's AI Resume Audit Agent for Chance Create — a career reinvention consultancy. You think like a senior recruiter with 8+ years inside Fortune 500 companies. You know what gets resumes ignored and what gets them opened.
+
+Your job: audit this resume HARD, then rewrite it so it passes ATS and passes the 10-second recruiter scan test.
+
+${resumeText ? `RESUME TEXT:\n${resumeText}` : '[Resume was uploaded as a PDF — analyze the full content above]'}
+
+${targetRole ? `TARGET ROLE: ${targetRole}` : ''}
+${industry ? `INDUSTRY: ${industry}` : ''}
+${focusNote ? `SPECIAL FOCUS: ${focusNote}` : ''}
+
+Respond ONLY with a valid JSON object in this exact format (no markdown, no explanation outside the JSON):
+
+{
+  "score": "Needs Work | Decent Foundation | Strong | Recruiter Ready",
+  "issues": [
+    { "type": "critical", "text": "Issue description and why it matters" },
+    { "type": "warning", "text": "..." },
+    { "type": "tip", "text": "..." }
+  ],
+  "tenSecondTest": "What a recruiter sees in the first 10 seconds scanning this resume — be blunt about what's working and what's not. Call out if the summary, job titles, or bullet structure are helping or hurting.",
+  "atsNotes": "Specific notes on ATS parsing risks: formatting issues, missing keywords, graphics, tables, columns, header/footer data, non-standard fonts. Be concrete.",
+  "revisedResume": "The full rewritten resume here. Rules for the rewrite:\\n- Clean single-column layout, no tables or columns\\n- Name and contact info at the top, clearly formatted\\n- Professional Summary: 2-3 lines MAX, specific, impact-led\\n- Work Experience: each role has company, title, dates (right-aligned), then 3-5 bullet points using this format: [Action Verb] + [What You Did] + [Result/Impact with metric if possible]\\n- No objectives, no 'references available upon request'\\n- Skills section: relevant keywords only, comma-separated or grouped by category\\n- Education last (unless recent grad)\\n- Use plain text formatting only — NO markdown bold/italic, just CAPS for section headers\\n- Write the whole resume in clean plain text, ready to paste directly into a Word doc or application form"
+}`;
+  }
+
+  function parseAndDisplay(raw) {
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const data = JSON.parse(clean);
+
+      // Score
+      document.getElementById('scoreLabel').textContent = data.score;
+
+      // Issues
+      const issueList = document.getElementById('issueList');
+      issueList.innerHTML = '';
+      (data.issues || []).forEach(issue => {
+        const li = document.createElement('li');
+        li.className = `issue-item ${issue.type}`;
+        li.innerHTML = `<span class="issue-tag">${issue.type}</span><span>${issue.text}</span>`;
+        issueList.appendChild(li);
+      });
+
+      // 10-second test
+      document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
+
+      // ATS
+      document.getElementById('atsResult').textContent = data.atsNotes || '';
+
+      // Revised resume
+      document.getElementById('revisedResume').textContent = data.revisedResume || '';
+
+      document.getElementById('results').classList.add('active');
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (e) {
+      document.getElementById('errorBox').textContent = 'Could not parse the response. Please try again.';
+      document.getElementById('errorBox').classList.add('active');
+    }
+  }
+
+  function copyResume() {
+    const text = document.getElementById('revisedResume').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = 'Copy Rewritten Resume', 2000);
+    });
+  }
+
+  function resetForm() {
+    uploadedText = '';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('resumeText').value = '';
+    document.getElementById('targetRole').value = '';
+    document.getElementById('industry').value = '';
+    document.getElementById('focusNote').value = '';
+    document.getElementById('fileName').style.display = 'none';
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('errorBox').classList.remove('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
