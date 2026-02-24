@@ -100,7 +100,6 @@
     margin-top: 12px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--accent-deep);
     display: none;
     align-items: center;
     justify-content: center;
@@ -169,7 +168,6 @@
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-    letter-spacing: 0.02em;
     width: 100%;
     display: flex;
     align-items: center;
@@ -380,12 +378,12 @@
   footer a { color: var(--accent-deep); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
 
-  /* ── EMAIL GATE ── */
+  /* EMAIL GATE */
   .email-gate {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(36, 36, 36, 0.6);
+    background: rgba(36,36,36,0.6);
     backdrop-filter: blur(4px);
     z-index: 100;
     align-items: center;
@@ -484,7 +482,6 @@
     margin-top: 12px;
     line-height: 1.6;
   }
-
 </style>
 </head>
 <body>
@@ -531,77 +528,76 @@
   <div class="error-box" id="errorBox"></div>
 
   <button class="btn-primary" id="analyzeBtn" onclick="analyzeResume()">
-    Audit My Resume →
+    Audit My Resume &rarr;
   </button>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <p><strong>Reading your resume like a recruiter would…</strong></p>
-    <p style="margin-top:6px;">This takes about 20–30 seconds.</p>
+    <p><strong>Reading your resume like a recruiter would&hellip;</strong></p>
+    <p style="margin-top:6px;">This takes about 20&ndash;30 seconds.</p>
   </div>
 
   <div class="results" id="results">
-
     <div class="score-banner" id="scoreBanner">
       <div>
         <div class="score-label">Recruiter Readability Score</div>
-        <div class="score-value" id="scoreValue">—</div>
+        <div class="score-value" id="scoreValue">&mdash;</div>
       </div>
-      <div class="score-icon" id="scoreIcon">—</div>
+      <div class="score-icon" id="scoreIcon">&mdash;</div>
     </div>
 
     <div class="card">
-      <div class="card-title">⚠ What's Costing You Interviews</div>
+      <div class="card-title">&#9888; What's Costing You Interviews</div>
       <ul class="issue-list" id="issueList"></ul>
     </div>
 
     <div class="card">
-      <div class="card-title">⚡ The 10-Second Scan Test</div>
+      <div class="card-title">&#9889; The 10-Second Scan Test</div>
       <div class="card-body" id="tenSecondResult"></div>
     </div>
 
     <div class="card">
-      <div class="card-title">🤖 ATS & Parsing Notes</div>
+      <div class="card-title">&#129302; ATS &amp; Parsing Notes</div>
       <div class="card-body" id="atsResult"></div>
     </div>
 
     <div class="resume-wrap">
       <div class="resume-wrap-header">
-        <span>✦ Rewritten Resume</span>
+        <span>&#10022; Rewritten Resume</span>
         <div class="btn-group">
-          <button class="btn-sm" id="copyBtn" onclick="copyResume()">📋 Copy</button>
-          <button class="btn-sm" id="downloadBtn" onclick="downloadResume()">⬇ Download PDF</button>
+          <button class="btn-sm" id="copyBtn" onclick="copyResume()">&#128203; Copy</button>
+          <button class="btn-sm" id="downloadBtn" onclick="downloadResume()">&#8595; Download PDF</button>
         </div>
       </div>
       <div class="resume-output" id="revisedResume"></div>
     </div>
 
-    <button class="btn-reset" onclick="resetForm()">← Start Over</button>
+    <button class="btn-reset" onclick="resetForm()">&larr; Start Over</button>
   </div>
 
   <!-- Email Gate Modal -->
   <div class="email-gate" id="emailGate">
     <div class="email-gate-box">
-      <div class="email-gate-icon">🔓</div>
+      <div class="email-gate-icon">&#128275;</div>
       <h2>Your audit is ready.<br><em>Get instant access.</em></h2>
-      <p>Drop your email to unlock your results — plus get recruiter insights, career reinvention tips, and real talk from someone who's hired for Fortune 500 companies and made her own career pivot.</p>
+      <p>Drop your email to unlock your results &mdash; plus get recruiter insights, career reinvention tips, and real talk from someone who's hired for Fortune 500 companies and made her own career pivot.</p>
       <div class="email-gate-fields">
         <input type="text" id="gateName" placeholder="First name" autocomplete="given-name">
         <input type="email" id="gateEmail" placeholder="Your email address" autocomplete="email">
       </div>
       <button class="btn-unlock" id="unlockBtn" onclick="submitEmailGate()">
-        Unlock My Resume Audit →
+        Unlock My Resume Audit &rarr;
       </button>
       <div class="email-gate-error" id="gateError"></div>
       <button class="email-gate-skip" onclick="skipEmailGate()">No thanks, just show me the results</button>
-      <p class="email-gate-privacy">No spam. Unsubscribe anytime. Your info stays with Chance Create™.</p>
+      <p class="email-gate-privacy">No spam. Unsubscribe anytime. Your info stays with Chance Create&trade;.</p>
     </div>
   </div>
 
 </div>
 
 <footer>
-  Built for <a href="https://chancecreate.com">Chance Create™</a> · Career Reinvention Tools for Real People · Not generic advice.
+  Built for <a href="https://chancecreate.com">Chance Create&trade;</a> &middot; Career Reinvention Tools for Real People &middot; Not generic advice.
 </footer>
 
 <script>
@@ -609,15 +605,17 @@
   const dropZone = document.getElementById('dropZone');
   const fileStatus = document.getElementById('fileStatus');
   let uploadedText = '';
+  let pendingResults = null;
 
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-  dropZone.addEventListener('drop', e => {
+  // Drag and drop
+  dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
+  dropZone.addEventListener('drop', function(e) {
     e.preventDefault();
     dropZone.classList.remove('dragover');
     if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
   });
-  fileInput.addEventListener('change', () => {
+  fileInput.addEventListener('change', function() {
     if (fileInput.files[0]) handleFile(fileInput.files[0]);
   });
 
@@ -627,7 +625,7 @@
   }
 
   async function handleFile(file) {
-    setFileStatus('⏳ ' + file.name + ' — extracting text...', '');
+    setFileStatus('Extracting text from ' + file.name + '...', '');
     uploadedText = '';
     try {
       if (file.type === 'text/plain') {
@@ -646,19 +644,19 @@
   }
 
   async function extractPdfText(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
       reader.onload = async function(e) {
         try {
-          const typedArray = new Uint8Array(e.target.result);
-          const pdfjsLib = window['pdfjs-dist/build/pdf'];
+          var typedArray = new Uint8Array(e.target.result);
+          var pdfjsLib = window['pdfjs-dist/build/pdf'];
           pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-          const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
-          let fullText = '';
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            fullText += content.items.map(item => item.str).join(' ') + '\n';
+          var pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+          var fullText = '';
+          for (var i = 1; i <= pdf.numPages; i++) {
+            var page = await pdf.getPage(i);
+            var content = await page.getTextContent();
+            fullText += content.items.map(function(item) { return item.str; }).join(' ') + '\n';
           }
           resolve(fullText.trim());
         } catch(err) { reject(err); }
@@ -669,16 +667,16 @@
   }
 
   async function analyzeResume() {
-    const pasteText = document.getElementById('resumeText').value.trim();
-    const targetRole = document.getElementById('targetRole').value.trim();
-    const industry = document.getElementById('industry').value.trim();
-    const focusNote = document.getElementById('focusNote').value.trim();
-    const errorBox = document.getElementById('errorBox');
+    var pasteText = document.getElementById('resumeText').value.trim();
+    var targetRole = document.getElementById('targetRole').value.trim();
+    var industry = document.getElementById('industry').value.trim();
+    var focusNote = document.getElementById('focusNote').value.trim();
+    var errorBox = document.getElementById('errorBox');
 
     errorBox.classList.remove('active');
     errorBox.textContent = '';
 
-    const resumeContent = uploadedText || pasteText;
+    var resumeContent = uploadedText || pasteText;
     if (!resumeContent) {
       errorBox.textContent = 'Please upload a resume or paste your resume text before analyzing.';
       errorBox.classList.add('active');
@@ -690,23 +688,30 @@
     document.getElementById('results').classList.remove('active');
 
     try {
-      const response = await fetch('/.netlify/functions/analyze', {
+      var prompt = buildPrompt(resumeContent, targetRole, industry, focusNote);
+      var response = await fetch('/.netlify/functions/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{
-            role: 'user',
-            content: buildPrompt(resumeContent, targetRole, industry, focusNote)
-          }]
-        })
+        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
       });
 
-      const data = await response.json();
+      var data = await response.json();
       if (data.error) throw new Error(typeof data.error === 'object' ? JSON.stringify(data.error) : data.error);
 
-      const raw = (data.content || []).map(c => c.text || '').join('');
+      var raw = (data.content || []).map(function(c) { return c.text || ''; }).join('');
       if (!raw) throw new Error('Empty response — please try again.');
-      parseAndDisplay(raw);
+
+      var jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found in response.');
+
+      var cleaned = jsonMatch[0]
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ')
+        .replace(/\t/g, ' ');
+
+      var parsed = JSON.parse(cleaned);
+
+      // Show email gate then render results
+      showEmailGate(parsed);
 
     } catch (err) {
       errorBox.textContent = err.message || 'Something went wrong. Please try again.';
@@ -718,267 +723,18 @@
   }
 
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    return `You are a senior recruiter with 8+ years at JPMorgan Chase, Intuit, and TD Bank. Audit this resume thoroughly and return ONLY a single valid JSON object — no markdown, no backticks, no extra text whatsoever.
-
-RESUME:
-${resumeText.slice(0, 4000)}
-
-TARGET ROLE: ${targetRole || 'Not specified'}
-INDUSTRY: ${industry || 'Not specified'}
-${focusNote ? 'SPECIAL FOCUS: ' + focusNote : ''}
-
-CRITICAL RULES FOR THE REWRITE:
-- List EVERY job role separately with its exact title, company, dates, and 3-4 bullet points
-- NEVER combine multiple roles into one entry
-- NEVER use placeholder text like "[continued]" or "[additional roles]"
-- Write the COMPLETE resume from top to bottom
-- Use bullet character • for all bullets
-- Section headers must be plain ALL CAPS text (no symbols)
-- Use \\n for line breaks, escape all quotes with backslash
-
-Return ONLY this JSON:
-{"score":"Needs Work","issues":[{"type":"critical","text":"Specific issue and why it matters"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Exactly what a recruiter sees and thinks in the first 10 seconds. Be direct and specific.","atsNotes":"Specific ATS risks: columns, tables, special characters, missing keywords, date formats.","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n2-3 sentence impact-focused summary with certifications and years of experience.\\n\\nEXPERIENCE\\n\\nCOMPANY NAME\\nJob Title | City, State\\nStart Year - End Year\\n• Action verb + what you did + measurable result\\n• Action verb + what you did + measurable result\\n• Action verb + what you did + measurable result\\n\\n[repeat for EVERY role individually]\\n\\nEDUCATION\\nDegree, School, Year\\n\\nSKILLS\\nCategory: skill1, skill2, skill3"}`;
+    var text = resumeText.slice(0, 4000);
+    return 'You are a senior recruiter with 8+ years at JPMorgan Chase, Intuit, and TD Bank. Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\nRESUME:\n' + text + '\n\nTARGET ROLE: ' + (targetRole || 'Not specified') + '\nINDUSTRY: ' + (industry || 'Not specified') + '\n' + (focusNote ? 'SPECIAL FOCUS: ' + focusNote + '\n' : '') + '\nCRITICAL RULES:\n- List EVERY job role separately with exact title, company, dates, 3-4 bullets\n- NEVER combine roles or use placeholders like [continued]\n- Write the COMPLETE resume top to bottom\n- Use bullet character for all bullets\n- Section headers in ALL CAPS\n- Use \\n for line breaks\n\nReturn ONLY this JSON structure:\n{"score":"Needs Work","issues":[{"type":"critical","text":"issue"},{"type":"warning","text":"issue"},{"type":"tip","text":"tip"}],"tenSecondTest":"what recruiter sees in 10 seconds","atsNotes":"ATS risks","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n2-3 sentence summary\\n\\nEXPERIENCE\\n\\nCOMPANY\\nTitle | Location\\nDates\\nbullet\\nbullet\\n\\nSKILLS\\nCategory: skills"}';
   }
 
-  function parseAndDisplay(raw) {
-    try {
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON found in response.');
-
-      // Clean control characters and tabs that break JSON parsing
-      const cleaned = jsonMatch[0]
-        .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ')
-        .replace(/\t/g, ' ');
-
-      const data = JSON.parse(cleaned);
-
-  function renderResults(data) {
-      // Score banner
-      const score = data.score || 'Needs Work';
-      document.getElementById('scoreValue').textContent = score;
-      const banner = document.getElementById('scoreBanner');
-      const icons = { 'Recruiter Ready': '🟢', 'Strong': '🟣', 'Decent Foundation': '🟡', 'Needs Work': '🔴' };
-      const classes = { 'Recruiter Ready': 'recruiter-ready', 'Strong': 'strong', 'Decent Foundation': 'decent', 'Needs Work': 'needs-work' };
-      banner.className = 'score-banner ' + (classes[score] || 'needs-work');
-      document.getElementById('scoreIcon').textContent = icons[score] || '🔴';
-
-      // Issues
-      const issueList = document.getElementById('issueList');
-      issueList.innerHTML = '';
-      (data.issues || []).forEach(issue => {
-        const li = document.createElement('li');
-        li.className = 'issue-item ' + (issue.type || 'tip');
-        li.innerHTML = '<span class="issue-tag">' + (issue.type || 'tip') + '</span><span>' + issue.text + '</span>';
-        issueList.appendChild(li);
-      });
-
-      document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
-      document.getElementById('atsResult').textContent = data.atsNotes || '';
-
-      // Resume — convert escaped \n to real line breaks
-      const resumeText = (data.revisedResume || '').replace(/\\n/g, '\n');
-      document.getElementById('revisedResume').textContent = resumeText;
-
-      document.getElementById('results').classList.add('active');
-      setTimeout(() => {
-        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-  }
-
-      // Show email gate before rendering results
-      showEmailGate(data);
-
-    } catch (e) {
-      const errorBox = document.getElementById('errorBox');
-      errorBox.textContent = 'Could not read the response. Please try again. (' + e.message + ')';
-      errorBox.classList.add('active');
-    }
-  }
-
-  function copyResume() {
-    const text = document.getElementById('revisedResume').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById('copyBtn');
-      btn.textContent = '✓ Copied!';
-      btn.classList.add('success');
-      setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('success'); }, 2500);
-    });
-  }
-
-  function downloadResume() {
-    const text = document.getElementById('revisedResume').textContent;
-    const lines = text.split('\n');
-    const nameRaw = lines[0].trim().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_') || 'resume';
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-
-    const marginX = 60;
-    const marginY = 60;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const contentWidth = pageWidth - marginX * 2;
-    let y = marginY;
-    let isFirstLine = true;
-
-    function checkPage(needed) {
-      if (y + needed > pageHeight - marginY) {
-        doc.addPage();
-        y = marginY;
-      }
-    }
-
-    lines.forEach((line, idx) => {
-      const trimmed = line.trim();
-
-      // ── Name (first non-empty line)
-      if (isFirstLine && trimmed) {
-        isFirstLine = false;
-        doc.setFont('times', 'bold');
-        doc.setFontSize(18);
-        doc.setTextColor(36, 36, 36);
-        checkPage(28);
-        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
-        y += 28;
-        return;
-      }
-
-      // ── Contact line (line 2, contains | or @ or phone pattern)
-      if (idx === 1 && trimmed) {
-        doc.setFont('times', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(100, 100, 100);
-        checkPage(16);
-        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
-        y += 20;
-        return;
-      }
-
-      // ── Section headers: ALL CAPS, no numbers, no special chars, min 3 chars
-      const isHeader = trimmed.length >= 3
-        && trimmed === trimmed.toUpperCase()
-        && /^[A-Z\s&\/]+$/.test(trimmed);
-
-      if (isHeader) {
-        y += 14; // space above header
-        checkPage(22);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(120, 70, 160);
-        doc.text(trimmed, marginX, y);
-        // Underline rule
-        doc.setDrawColor(206, 177, 221);
-        doc.setLineWidth(0.75);
-        doc.line(marginX, y + 3, pageWidth - marginX, y + 3);
-        y += 16;
-        doc.setTextColor(36, 36, 36);
-        return;
-      }
-
-      // ── Bullet points
-      if (trimmed.startsWith('•')) {
-        doc.setFont('times', 'normal');
-        doc.setFontSize(10);
-        doc.setTextColor(36, 36, 36);
-        const bulletContent = trimmed.substring(1).trim();
-        const wrapped = doc.splitTextToSize(bulletContent, contentWidth - 18);
-        wrapped.forEach((wline, i) => {
-          checkPage(14);
-          if (i === 0) {
-            doc.text('•', marginX + 4, y);
-            doc.text(wline, marginX + 14, y);
-          } else {
-            doc.text(wline, marginX + 14, y);
-          }
-          y += 14;
-        });
-        y += 2;
-        return;
-      }
-
-      // ── Empty line
-      if (!trimmed) {
-        y += 6;
-        return;
-      }
-
-      // ── Job title / company / date lines (bold if short and no bullets)
-      const isJobLine = trimmed.length < 80 && (
-        trimmed.includes('|') ||
-        /\d{4}/.test(trimmed) ||
-        trimmed === trimmed.toUpperCase().replace(/[^A-Z\s]/g, '') + trimmed.replace(/[A-Z\s]/g, '')
-      );
-
-      if (isJobLine && trimmed.includes('|')) {
-        doc.setFont('times', 'bold');
-        doc.setFontSize(10);
-        doc.setTextColor(36, 36, 36);
-        checkPage(15);
-        doc.text(trimmed, marginX, y);
-        y += 15;
-        return;
-      }
-
-      if (isJobLine && /^\d{4}/.test(trimmed) || /\d{4}\s*[-–]\s*(Present|\d{4})/.test(trimmed)) {
-        doc.setFont('times', 'italic');
-        doc.setFontSize(9.5);
-        doc.setTextColor(100, 100, 100);
-        checkPage(14);
-        doc.text(trimmed, marginX, y);
-        y += 15;
-        return;
-      }
-
-      // ── Company name lines (short, no special chars, bold)
-      if (trimmed.length < 50 && !trimmed.includes(',') && idx > 2) {
-        doc.setFont('times', 'bold');
-        doc.setFontSize(10.5);
-        doc.setTextColor(36, 36, 36);
-        checkPage(16);
-        doc.text(trimmed, marginX, y);
-        y += 16;
-        return;
-      }
-
-      // ── Normal paragraph text
-      doc.setFont('times', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor(36, 36, 36);
-      const wrapped = doc.splitTextToSize(trimmed, contentWidth);
-      wrapped.forEach(wline => {
-        checkPage(14);
-        doc.text(wline, marginX, y);
-        y += 14;
-      });
-    });
-
-    doc.save(nameRaw + '_rewritten.pdf');
-
-    const btn = document.getElementById('downloadBtn');
-    btn.textContent = '✓ Downloaded!';
-    btn.classList.add('success');
-    setTimeout(() => { btn.textContent = '⬇ Download PDF'; btn.classList.remove('success'); }, 2500);
-  }
-
-  function resetForm() {
-    uploadedText = '';
-    fileInput.value = '';
-    document.getElementById('resumeText').value = '';
-    document.getElementById('targetRole').value = '';
-    document.getElementById('industry').value = '';
-    document.getElementById('focusNote').value = '';
-    fileStatus.className = 'file-status';
-    document.getElementById('results').classList.remove('active');
-    document.getElementById('errorBox').classList.remove('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  // ── EMAIL GATE ──
-  let pendingResults = null;
-
-  function showEmailGate(resultsData) {
-    pendingResults = resultsData;
+  // EMAIL GATE
+  function showEmailGate(data) {
+    pendingResults = data;
     document.getElementById('emailGate').classList.add('active');
-    setTimeout(() => document.getElementById('gateName').focus(), 100);
+    setTimeout(function() {
+      var nameField = document.getElementById('gateName');
+      if (nameField) nameField.focus();
+    }, 100);
   }
 
   function skipEmailGate() {
@@ -990,12 +746,13 @@ Return ONLY this JSON:
   }
 
   async function submitEmailGate() {
-    const name = document.getElementById('gateName').value.trim();
-    const email = document.getElementById('gateEmail').value.trim();
-    const gateError = document.getElementById('gateError');
-    const unlockBtn = document.getElementById('unlockBtn');
+    var name = document.getElementById('gateName').value.trim();
+    var email = document.getElementById('gateEmail').value.trim();
+    var gateError = document.getElementById('gateError');
+    var unlockBtn = document.getElementById('unlockBtn');
 
     gateError.classList.remove('active');
+    gateError.textContent = '';
 
     if (!email || !email.includes('@')) {
       gateError.textContent = 'Please enter a valid email address.';
@@ -1004,19 +761,19 @@ Return ONLY this JSON:
     }
 
     unlockBtn.disabled = true;
-    unlockBtn.textContent = 'Subscribing...';
+    unlockBtn.textContent = 'One moment...';
 
     try {
-      const response = await fetch('/.netlify/functions/subscribe', {
+      var response = await fetch('/.netlify/functions/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name })
+        body: JSON.stringify({ email: email, name: name })
       });
-      const data = await response.json();
+      var data = await response.json();
       if (!data.success) throw new Error(data.error || 'Subscription failed');
     } catch (err) {
-      // Even if subscription fails, still show results
       console.warn('Subscribe error:', err.message);
+      // Still show results even if subscribe fails
     }
 
     document.getElementById('emailGate').classList.remove('active');
@@ -1026,6 +783,170 @@ Return ONLY this JSON:
     }
   }
 
+  function renderResults(data) {
+    var score = data.score || 'Needs Work';
+    document.getElementById('scoreValue').textContent = score;
+    var banner = document.getElementById('scoreBanner');
+    var icons = { 'Recruiter Ready': '🟢', 'Strong': '🟣', 'Decent Foundation': '🟡', 'Needs Work': '🔴' };
+    var classes = { 'Recruiter Ready': 'recruiter-ready', 'Strong': 'strong', 'Decent Foundation': 'decent', 'Needs Work': 'needs-work' };
+    banner.className = 'score-banner ' + (classes[score] || 'needs-work');
+    document.getElementById('scoreIcon').textContent = icons[score] || '🔴';
+
+    var issueList = document.getElementById('issueList');
+    issueList.innerHTML = '';
+    (data.issues || []).forEach(function(issue) {
+      var li = document.createElement('li');
+      li.className = 'issue-item ' + (issue.type || 'tip');
+      li.innerHTML = '<span class="issue-tag">' + (issue.type || 'tip') + '</span><span>' + issue.text + '</span>';
+      issueList.appendChild(li);
+    });
+
+    document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
+    document.getElementById('atsResult').textContent = data.atsNotes || '';
+
+    var resumeText = (data.revisedResume || '').replace(/\\n/g, '\n');
+    document.getElementById('revisedResume').textContent = resumeText;
+
+    document.getElementById('results').classList.add('active');
+    setTimeout(function() {
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
+  function copyResume() {
+    var text = document.getElementById('revisedResume').textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = document.getElementById('copyBtn');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('success');
+      setTimeout(function() { btn.textContent = '📋 Copy'; btn.classList.remove('success'); }, 2500);
+    });
+  }
+
+  function downloadResume() {
+    var text = document.getElementById('revisedResume').textContent;
+    var lines = text.split('\n');
+    var nameRaw = lines[0].trim().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_') || 'resume';
+
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
+    var marginX = 60, marginY = 60;
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var pageHeight = doc.internal.pageSize.getHeight();
+    var contentWidth = pageWidth - marginX * 2;
+    var y = marginY;
+    var isFirstLine = true;
+
+    function checkPage(needed) {
+      if (y + needed > pageHeight - marginY) { doc.addPage(); y = marginY; }
+    }
+
+    lines.forEach(function(line, idx) {
+      var trimmed = line.trim();
+
+      if (isFirstLine && trimmed) {
+        isFirstLine = false;
+        doc.setFont('times', 'bold');
+        doc.setFontSize(18);
+        doc.setTextColor(36, 36, 36);
+        checkPage(28);
+        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
+        y += 28;
+        return;
+      }
+
+      if (idx === 1 && trimmed) {
+        doc.setFont('times', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        checkPage(16);
+        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
+        y += 20;
+        return;
+      }
+
+      var isHeader = trimmed.length >= 3 && trimmed === trimmed.toUpperCase() && /^[A-Z\s&\/]+$/.test(trimmed);
+      if (isHeader) {
+        y += 14;
+        checkPage(22);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(120, 70, 160);
+        doc.text(trimmed, marginX, y);
+        doc.setDrawColor(206, 177, 221);
+        doc.setLineWidth(0.75);
+        doc.line(marginX, y + 3, pageWidth - marginX, y + 3);
+        y += 16;
+        doc.setTextColor(36, 36, 36);
+        return;
+      }
+
+      if (trimmed.startsWith('\u2022')) {
+        doc.setFont('times', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(36, 36, 36);
+        var bulletContent = trimmed.substring(1).trim();
+        var wrapped = doc.splitTextToSize(bulletContent, contentWidth - 18);
+        wrapped.forEach(function(wline, i) {
+          checkPage(14);
+          if (i === 0) { doc.text('\u2022', marginX + 4, y); doc.text(wline, marginX + 14, y); }
+          else { doc.text(wline, marginX + 14, y); }
+          y += 14;
+        });
+        y += 2;
+        return;
+      }
+
+      if (!trimmed) { y += 6; return; }
+
+      if (trimmed.includes('|') && trimmed.length < 80) {
+        doc.setFont('times', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(36, 36, 36);
+        checkPage(15);
+        doc.text(trimmed, marginX, y);
+        y += 15;
+        return;
+      }
+
+      if (/\d{4}\s*[-\u2013]\s*(Present|\d{4})/.test(trimmed)) {
+        doc.setFont('times', 'italic');
+        doc.setFontSize(9.5);
+        doc.setTextColor(100, 100, 100);
+        checkPage(14);
+        doc.text(trimmed, marginX, y);
+        y += 15;
+        return;
+      }
+
+      doc.setFont('times', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(36, 36, 36);
+      var wrappedText = doc.splitTextToSize(trimmed, contentWidth);
+      wrappedText.forEach(function(wline) { checkPage(14); doc.text(wline, marginX, y); y += 14; });
+    });
+
+    doc.save(nameRaw + '_rewritten.pdf');
+    var btn = document.getElementById('downloadBtn');
+    btn.textContent = '✓ Downloaded!';
+    btn.classList.add('success');
+    setTimeout(function() { btn.textContent = '⬇ Download PDF'; btn.classList.remove('success'); }, 2500);
+  }
+
+  function resetForm() {
+    uploadedText = '';
+    pendingResults = null;
+    fileInput.value = '';
+    document.getElementById('resumeText').value = '';
+    document.getElementById('targetRole').value = '';
+    document.getElementById('industry').value = '';
+    document.getElementById('focusNote').value = '';
+    document.getElementById('fileStatus').className = 'file-status';
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('errorBox').classList.remove('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 </script>
 
 </body>
