@@ -379,6 +379,112 @@
   }
   footer a { color: var(--accent-deep); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+
+  /* ── EMAIL GATE ── */
+  .email-gate {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(36, 36, 36, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .email-gate.active { display: flex; }
+  .email-gate-box {
+    background: #fffbf5;
+    border-radius: 18px;
+    padding: 44px 40px;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(36,36,36,0.18);
+    animation: popIn 0.25s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.94); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .email-gate-icon { font-size: 2.4rem; margin-bottom: 12px; }
+  .email-gate-box h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #242424;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .email-gate-box h2 em { color: #9b6dbb; font-style: normal; }
+  .email-gate-box p {
+    font-size: 14px;
+    color: #95897a;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .email-gate-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .email-gate-fields input {
+    background: #fff;
+    border: 1.5px solid #e8e0f0;
+    border-radius: 9px;
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: #242424;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  .email-gate-fields input:focus {
+    border-color: #ceb1dd;
+    box-shadow: 0 0 0 3px rgba(206,177,221,0.2);
+  }
+  .btn-unlock {
+    background: #9b6dbb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 15px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .btn-unlock:hover { background: #8559a8; transform: translateY(-1px); }
+  .btn-unlock:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .email-gate-skip {
+    font-size: 12px;
+    color: #95897a;
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .email-gate-skip:hover { color: #242424; }
+  .email-gate-error {
+    font-size: 13px;
+    color: #e05252;
+    margin-top: 8px;
+    display: none;
+  }
+  .email-gate-error.active { display: block; }
+  .email-gate-privacy {
+    font-size: 11px;
+    color: #b0a898;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
 </style>
 </head>
 <body>
@@ -471,6 +577,25 @@
     </div>
 
     <button class="btn-reset" onclick="resetForm()">← Start Over</button>
+  </div>
+
+  <!-- Email Gate Modal -->
+  <div class="email-gate" id="emailGate">
+    <div class="email-gate-box">
+      <div class="email-gate-icon">📬</div>
+      <h2>Your audit is ready.<br><em>Where should we send it?</em></h2>
+      <p>Drop your email to unlock your full resume audit and rewritten resume — plus get career reinvention insights from someone who's sat on both sides of the hiring table.</p>
+      <div class="email-gate-fields">
+        <input type="text" id="gateName" placeholder="First name" autocomplete="given-name">
+        <input type="email" id="gateEmail" placeholder="Your email address" autocomplete="email">
+      </div>
+      <button class="btn-unlock" id="unlockBtn" onclick="submitEmailGate()">
+        Unlock My Resume Audit →
+      </button>
+      <div class="email-gate-error" id="gateError"></div>
+      <button class="email-gate-skip" onclick="skipEmailGate()">No thanks, just show me the results</button>
+      <p class="email-gate-privacy">No spam. No selling your info. Just real career insights from Chance Create™.</p>
+    </div>
   </div>
 
 </div>
@@ -627,6 +752,7 @@ Return ONLY this JSON:
 
       const data = JSON.parse(cleaned);
 
+  function renderResults(data) {
       // Score banner
       const score = data.score || 'Needs Work';
       document.getElementById('scoreValue').textContent = score;
@@ -657,6 +783,10 @@ Return ONLY this JSON:
       setTimeout(() => {
         document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
+  }
+
+      // Show email gate before rendering results
+      showEmailGate(data);
 
     } catch (e) {
       const errorBox = document.getElementById('errorBox');
@@ -842,6 +972,60 @@ Return ONLY this JSON:
     document.getElementById('errorBox').classList.remove('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+  // ── EMAIL GATE ──
+  let pendingResults = null;
+
+  function showEmailGate(resultsData) {
+    pendingResults = resultsData;
+    document.getElementById('emailGate').classList.add('active');
+    setTimeout(() => document.getElementById('gateName').focus(), 100);
+  }
+
+  function skipEmailGate() {
+    document.getElementById('emailGate').classList.remove('active');
+    if (pendingResults) {
+      renderResults(pendingResults);
+      pendingResults = null;
+    }
+  }
+
+  async function submitEmailGate() {
+    const name = document.getElementById('gateName').value.trim();
+    const email = document.getElementById('gateEmail').value.trim();
+    const gateError = document.getElementById('gateError');
+    const unlockBtn = document.getElementById('unlockBtn');
+
+    gateError.classList.remove('active');
+
+    if (!email || !email.includes('@')) {
+      gateError.textContent = 'Please enter a valid email address.';
+      gateError.classList.add('active');
+      return;
+    }
+
+    unlockBtn.disabled = true;
+    unlockBtn.textContent = 'Subscribing...';
+
+    try {
+      const response = await fetch('/.netlify/functions/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name })
+      });
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || 'Subscription failed');
+    } catch (err) {
+      // Even if subscription fails, still show results
+      console.warn('Subscribe error:', err.message);
+    }
+
+    document.getElementById('emailGate').classList.remove('active');
+    if (pendingResults) {
+      renderResults(pendingResults);
+      pendingResults = null;
+    }
+  }
+
 </script>
 
 </body>
