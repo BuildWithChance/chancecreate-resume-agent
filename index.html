@@ -570,7 +570,8 @@
       const data = await response.json();
       if (data.error) throw new Error(data.error.message);
 
-      const raw = data.content.map(c => c.text || '').join('');
+      const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+      const raw = (parsed.content || parsed).map(c => c.text || '').join('');
       parseAndDisplay(raw);
 
     } catch (err) {
