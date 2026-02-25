@@ -571,6 +571,56 @@
     display: inline-block;
   }
 
+  /* GUEST SAVE PROMPT */
+  .guest-save-prompt {
+    display: none;
+    background: linear-gradient(135deg, var(--surface2) 0%, #f0e8f8 100%);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .guest-save-prompt.active { display: block; }
+  .guest-save-prompt p {
+    font-size: 14px;
+    color: var(--text);
+    margin: 0 0 14px 0;
+    line-height: 1.6;
+  }
+  .guest-save-prompt p strong { color: var(--accent-deep); }
+  .guest-save-prompt-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-deep);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .guest-save-prompt-btn:hover {
+    background: #8559a8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(155,109,187,0.3);
+  }
+  .guest-save-prompt-dismiss {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .guest-save-prompt-dismiss:hover { color: var(--text); }
+
   /* SIGNIN BAR */
   .signin-bar {
     display: flex;
@@ -708,6 +758,14 @@
         </div>
       </div>
       <div class="resume-output" id="revisedResume"></div>
+    </div>
+
+    <!-- Guest save prompt — shown after skip -->
+    <div class="guest-save-prompt" id="guestSavePrompt">
+      <p>&#128190; <strong>Want to save this audit and track your progress?</strong><br>
+      Create a free account with your email and see how your score improves over time.</p>
+      <button class="guest-save-prompt-btn" onclick="showGuestSignup()">&#128274; Save My Audit &rarr;</button>
+      <button class="guest-save-prompt-dismiss" onclick="dismissSavePrompt()">No thanks, I'll skip saving</button>
     </div>
 
     <button class="btn-reset" onclick="resetForm()">&larr; Start Over</button>
@@ -909,6 +967,10 @@
     prompt += 'INDUSTRY: ' + (industry || 'Not specified') + '\n';
     if (focusNote) prompt += 'SPECIAL FOCUS: ' + focusNote + '\n';
     prompt += '\nCRITICAL RULES — follow exactly:\n';
+    prompt += '\n0. SCORE FIELD\n';
+    prompt += '   - The score field MUST be EXACTLY one of these four values (no variations):\n';
+    prompt += '   - "Recruiter Ready" | "Strong" | "Decent Foundation" | "Needs Work"\n';
+    prompt += '   - NEVER use: Good, Fair, Average, Poor, Excellent, Needs Improvement, or any other label\n';
     prompt += '\n1. COMPANY GROUPING\n';
     prompt += '   - Group all roles at the same company under ONE company name\n';
     prompt += '   - NEVER repeat the company name between roles\n';
@@ -955,6 +1017,8 @@
       renderResults(pendingResults);
       pendingResults = null;
     }
+    // Show save prompt after a short delay so results render first
+    setTimeout(showGuestSavePrompt, 800);
   }
 
   async function submitEmailGate() {
@@ -996,7 +1060,19 @@
   }
 
   function renderResults(data) {
-    var score = data.score || 'Needs Work';
+    // Normalize score label in case AI returns variations
+    var rawScore = data.score || 'Needs Work';
+    var scoreNormMap = {
+      'Good': 'Decent Foundation',
+      'Decent': 'Decent Foundation',
+      'Needs Improvement': 'Needs Work',
+      'Excellent': 'Recruiter Ready',
+      'Outstanding': 'Recruiter Ready',
+      'Average': 'Decent Foundation',
+      'Fair': 'Needs Work',
+      'Poor': 'Needs Work',
+    };
+    var score = scoreNormMap[rawScore] || rawScore;
     var icons = { 'Recruiter Ready': '🟢', 'Strong': '🟣', 'Decent Foundation': '🟡', 'Needs Work': '🔴' };
     var percent = calcScorePercent(score, data.issues);
 
@@ -1254,6 +1330,29 @@
     setTimeout(function() { btn.textContent = '⬇ Download PDF'; btn.classList.remove('success'); }, 2500);
   }
 
+  // ── GUEST SAVE PROMPT ──
+  function showGuestSavePrompt() {
+    var prompt = document.getElementById('guestSavePrompt');
+    if (prompt) prompt.classList.add('active');
+  }
+
+  function dismissSavePrompt() {
+    var prompt = document.getElementById('guestSavePrompt');
+    if (prompt) prompt.classList.remove('active');
+  }
+
+  function showGuestSignup() {
+    // Reuse the email gate as a signup prompt
+    dismissSavePrompt();
+    document.getElementById('emailGate').classList.add('active');
+    // Update heading to reflect context
+    var gateHeading = document.querySelector('#emailGate h2');
+    if (gateHeading) gateHeading.innerHTML = 'Save your audit.<br><em>It only takes a second.</em>';
+    setTimeout(function() {
+      document.getElementById('gateName').focus();
+    }, 100);
+  }
+
   function resetForm() {
     uploadedText = '';
     pendingResults = null;
@@ -1266,6 +1365,7 @@
     document.getElementById('results').classList.remove('active');
     document.getElementById('errorBox').classList.remove('active');
     if (window.clearScoreBanner) window.clearScoreBanner();
+    dismissSavePrompt();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
