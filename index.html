@@ -864,6 +864,14 @@
       var data = await response.json();
       if (data.error) throw new Error(typeof data.error === 'object' ? JSON.stringify(data.error) : data.error);
 
+      // Handle Anthropic overloaded or API errors
+      if (data.type === 'overloaded_error' || (data.error && data.error.type === 'overloaded_error')) {
+        throw new Error('The AI is experiencing high demand right now. Wait 30 seconds and try again — it usually clears up quickly.');
+      }
+      if (data.type === 'error' || (data.error && data.error.message)) {
+        throw new Error('API error: ' + (data.error.message || 'Please try again.'));
+      }
+
       var raw = (data.content || []).map(function(c) { return c.text || ''; }).join('');
       if (!raw) throw new Error('Empty response — please try again.');
 
