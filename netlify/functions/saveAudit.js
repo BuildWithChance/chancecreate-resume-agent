@@ -6,7 +6,7 @@ function supabaseRequest(path, method, body) {
   const hostname = SUPABASE_URL.replace("https://", "");
 
   return new Promise((resolve, reject) => {
-    const payload = JSON.stringify(body);
+    const payload = body ? JSON.stringify(body) : "";
     const req = https.request(
       {
         hostname,
@@ -17,7 +17,7 @@ function supabaseRequest(path, method, body) {
           "apikey": SUPABASE_ANON_KEY,
           "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           "Prefer": "return=representation",
-          "Content-Length": Buffer.byteLength(payload),
+          ...(payload && { "Content-Length": Buffer.byteLength(payload) }),
         },
       },
       (res) => {
@@ -27,30 +27,23 @@ function supabaseRequest(path, method, body) {
       }
     );
     req.on("error", reject);
-    req.write(payload);
+    if (payload) req.write(payload);
     req.end();
   });
 }
 
-// Convert score label to percentage
 function scoreToPercent(score, issues) {
-  // Base ranges per score label
   const ranges = {
-    "Recruiter Ready": { min: 90, max: 99 },
-    "Strong":          { min: 75, max: 89 },
-    "Decent Foundation": { min: 60, max: 74 },
-    "Needs Work":      { min: 30, max: 59 },
+    "Recruiter Ready":    { min: 90, max: 99 },
+    "Strong":             { min: 75, max: 89 },
+    "Decent Foundation":  { min: 60, max: 74 },
+    "Needs Work":         { min: 30, max: 59 },
   };
   const range = ranges[score] || ranges["Needs Work"];
-
-  // Adjust within range based on number of critical issues
-  const criticalCount = (issues || []).filter(i => i.type === 'critical').length;
-  const warningCount  = (issues || []).filter(i => i.type === 'warning').length;
+  const criticalCount = (issues || []).filter(i => i.type === "critical").length;
+  const warningCount  = (issues || []).filter(i => i.type === "warning").length;
   const penalty = (criticalCount * 4) + (warningCount * 2);
-  const raw = range.max - penalty;
-
-  // Clamp within range
-  return Math.min(range.max, Math.max(range.min, raw));
+  return Math.min(range.max, Math.max(range.min, range.max - penalty));
 }
 
 exports.handler = async function (event) {
@@ -72,7 +65,6 @@ exports.handler = async function (event) {
 
   try {
     const { email, auditData } = JSON.parse(event.body);
-
     if (!email || !auditData) {
       return { statusCode: 400, body: JSON.stringify({ error: "Missing email or audit data" }) };
     }
@@ -90,8 +82,8 @@ exports.handler = async function (event) {
       if (users && users.length > 0) userId = users[0].id;
     } catch (e) {}
 
-    // Save audit
-    const auditRes = await supabaseRequest(
+    // Save audit — now includes target_role
+    await supabaseRequest(
       "/rest/v1/audits",
       "POST",
       {
@@ -99,6 +91,7 @@ exports.handler = async function (event) {
         email,
         score: auditData.score,
         score_percent: scoreToPercent(auditData.score, auditData.issues),
+        target_role: auditData.targetRole || null,
         issues: auditData.issues,
         ten_second_test: auditData.tenSecondTest,
         ats_notes: auditData.atsNotes,
@@ -112,6 +105,7 @@ exports.handler = async function (event) {
       body: JSON.stringify({ success: true }),
     };
   } catch (err) {
+    console.error("saveAudit error:", err.message);
     return {
       statusCode: 500,
       headers: { "Access-Control-Allow-Origin": "*" },
