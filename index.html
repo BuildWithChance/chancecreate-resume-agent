@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resume Audit — Chance Create</title>
+<title>Free Resume Audit Tool — Chance Create</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -598,11 +598,14 @@
     border-color: var(--accent-deep);
   }
 </style>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 </head>
 <body>
 
 <header>
-  <p class="eyebrow">Chance Create · Career Reinvention Tools</p>
+  <p class="eyebrow">Chance Create · Free Resume Audit Tool</p>
   <h1>Your Resume Should<br><em>Open Doors in 10 Seconds.</em></h1>
   <p class="subtitle">Upload your resume and get a recruiter's-eye audit plus a fully rewritten version — ATS-ready, impact-led, and built to pass the 10-second scan.</p>
   <div class="signin-bar" id="signinBar">
@@ -668,16 +671,8 @@
   </div>
 
   <div class="results" id="results">
-    <div class="score-banner" id="scoreBanner">
-      <div>
-        <div class="score-label">Recruiter Readability Score</div>
-        <div class="score-value" id="scoreValue">&mdash;</div>
-      </div>
-      <div>
-        <div class="score-icon" id="scoreIcon">&mdash;</div>
-        <div class="score-percent-badge" id="scorePercent"></div>
-      </div>
-    </div>
+    <!-- React Score Banner -->
+    <div id="scoreBannerRoot"></div>
 
     <div class="card">
       <div class="card-title">&#9888; What's Costing You Interviews</div>
@@ -993,12 +988,13 @@
 
   function renderResults(data) {
     var score = data.score || 'Needs Work';
-    document.getElementById('scoreValue').textContent = score;
-    var banner = document.getElementById('scoreBanner');
     var icons = { 'Recruiter Ready': '🟢', 'Strong': '🟣', 'Decent Foundation': '🟡', 'Needs Work': '🔴' };
-    var classes = { 'Recruiter Ready': 'recruiter-ready', 'Strong': 'strong', 'Decent Foundation': 'decent', 'Needs Work': 'needs-work' };
-    banner.className = 'score-banner ' + (classes[score] || 'needs-work');
-    document.getElementById('scoreIcon').textContent = icons[score] || '🔴';
+    var percent = calcScorePercent(score, data.issues);
+
+    // Render React score banner with count-up animation
+    if (window.renderScoreBanner) {
+      window.renderScoreBanner(score, percent, icons[score] || '🔴');
+    }
 
     var issueList = document.getElementById('issueList');
     issueList.innerHTML = '';
@@ -1015,9 +1011,7 @@
     var resumeText = (data.revisedResume || '').replace(/\\n/g, '\n');
     document.getElementById('revisedResume').textContent = resumeText;
 
-    // Score percent badge — dynamic based on issue count
-    var percent = calcScorePercent(score, data.issues);
-    document.getElementById('scorePercent').textContent = percent + '%';
+
 
     document.getElementById('results').classList.add('active');
     setTimeout(function() {
@@ -1262,6 +1256,7 @@
     document.getElementById('fileStatus').className = 'file-status';
     document.getElementById('results').classList.remove('active');
     document.getElementById('errorBox').classList.remove('active');
+    if (window.clearScoreBanner) window.clearScoreBanner();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1396,6 +1391,103 @@
     loadHistory(email);
   }
 </script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function ScoreBanner({ score, percent, icon }) {
+      const [animated, setAnimated] = useState(false);
+      const [displayPercent, setDisplayPercent] = useState(0);
+
+      const classMap = {
+        'Recruiter Ready': 'recruiter-ready',
+        'Strong': 'strong',
+        'Decent Foundation': 'decent',
+        'Needs Work': 'needs-work'
+      };
+
+      const colorMap = {
+        'Recruiter Ready': '#7aab8a',
+        'Strong': '#9b6dbb',
+        'Decent Foundation': '#c97a3a',
+        'Needs Work': '#e05252'
+      };
+
+      useEffect(() => {
+        if (!score) return;
+        setAnimated(false);
+        setDisplayPercent(0);
+        const timer = setTimeout(() => setAnimated(true), 50);
+
+        // Count up animation
+        let start = 0;
+        const duration = 1000;
+        const step = (percent / duration) * 16;
+        const counter = setInterval(() => {
+          start += step;
+          if (start >= percent) {
+            setDisplayPercent(percent);
+            clearInterval(counter);
+          } else {
+            setDisplayPercent(Math.floor(start));
+          }
+        }, 16);
+
+        return () => { clearTimeout(timer); clearInterval(counter); };
+      }, [score, percent]);
+
+      if (!score) return null;
+
+      const bannerClass = classMap[score] || 'needs-work';
+      const color = colorMap[score] || '#e05252';
+
+      return (
+        <div className={`score-banner ${bannerClass}`} style={{
+          opacity: animated ? 1 : 0,
+          transform: animated ? 'translateY(0)' : 'translateY(12px)',
+          transition: 'opacity 0.4s ease, transform 0.4s ease'
+        }}>
+          <div>
+            <div className="score-label">Recruiter Readability Score</div>
+            <div className="score-value" style={{ color }}>{score}</div>
+            <div className="score-percent-badge" style={{ marginTop: '6px' }}>
+              {displayPercent}%
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div className="score-icon">{icon}</div>
+            <div style={{
+              marginTop: '8px',
+              fontSize: '11px',
+              fontWeight: '600',
+              color: color,
+              letterSpacing: '0.05em'
+            }}>
+              {score === 'Recruiter Ready' && 'Interview Ready'}
+              {score === 'Strong' && 'Nearly There'}
+              {score === 'Decent Foundation' && 'Needs Polish'}
+              {score === 'Needs Work' && 'Needs Rebuild'}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Expose render function to vanilla JS
+    window.renderScoreBanner = function(score, percent, icon) {
+      const root = document.getElementById('scoreBannerRoot');
+      if (!root) return;
+      ReactDOM.render(
+        <ScoreBanner score={score} percent={percent} icon={icon} />,
+        root
+      );
+    };
+
+    window.clearScoreBanner = function() {
+      const root = document.getElementById('scoreBannerRoot');
+      if (root) ReactDOM.unmountComponentAtNode(root);
+    };
+  </script>
 
 </body>
 </html>
