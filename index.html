@@ -1015,9 +1015,9 @@
     var resumeText = (data.revisedResume || '').replace(/\\n/g, '\n');
     document.getElementById('revisedResume').textContent = resumeText;
 
-    // Score percent badge
-    var percent = scoreMap[score] || 45;
-    document.getElementById('scorePercent').textContent = percent + '% match';
+    // Score percent badge — dynamic based on issue count
+    var percent = calcScorePercent(score, data.issues);
+    document.getElementById('scorePercent').textContent = percent + '%';
 
     document.getElementById('results').classList.add('active');
     setTimeout(function() {
@@ -1266,12 +1266,29 @@
   }
 
   // ── SCORE PERCENT ──
+  var scoreRanges = {
+    'Recruiter Ready':    { min: 90, max: 99 },
+    'Strong':             { min: 75, max: 89 },
+    'Decent Foundation':  { min: 60, max: 74 },
+    'Needs Work':         { min: 30, max: 59 }
+  };
+
+  // Fallback flat map for history panel (no issues data)
   var scoreMap = {
     'Recruiter Ready': 92,
     'Strong': 78,
     'Decent Foundation': 63,
     'Needs Work': 45
   };
+
+  function calcScorePercent(score, issues) {
+    var range = scoreRanges[score] || scoreRanges['Needs Work'];
+    var criticalCount = (issues || []).filter(function(i) { return i.type === 'critical'; }).length;
+    var warningCount  = (issues || []).filter(function(i) { return i.type === 'warning'; }).length;
+    var penalty = (criticalCount * 4) + (warningCount * 2);
+    var raw = range.max - penalty;
+    return Math.min(range.max, Math.max(range.min, raw));
+  }
 
   var scoreClassMap = {
     'Recruiter Ready': 'recruiter-ready',
