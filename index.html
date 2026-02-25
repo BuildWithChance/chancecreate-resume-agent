@@ -482,6 +482,98 @@
     margin-top: 12px;
     line-height: 1.6;
   }
+
+  /* HISTORY PANEL */
+  .history-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .history-panel.active { display: block; }
+  .history-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .history-header span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+  }
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .history-item {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .history-score.recruiter-ready { color: var(--success); }
+  .history-score.strong { color: var(--accent-deep); }
+  .history-score.decent { color: var(--warn); }
+  .history-score.needs-work { color: var(--danger); }
+  .history-date {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .history-percent {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-deep);
+    background: var(--surface2);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .history-empty {
+    padding: 24px 22px;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* SCORE PERCENT BADGE */
+  .score-percent-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-deep);
+    background: var(--surface2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  /* SIGNIN LINK */
+  .signin-bar {
+    text-align: right;
+    padding: 8px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .signin-bar a {
+    color: var(--accent-deep);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .signin-bar a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -490,9 +582,23 @@
   <p class="eyebrow">Chance Create · Career Reinvention Tools</p>
   <h1>Your Resume Should<br><em>Open Doors in 10 Seconds.</em></h1>
   <p class="subtitle">Upload your resume and get a recruiter's-eye audit plus a fully rewritten version — ATS-ready, impact-led, and built to pass the 10-second scan.</p>
+  <div class="signin-bar" id="signinBar">
+    <a onclick="showSigninGate()">Returning? Sign in to see your history</a>
+  </div>
 </header>
 
 <div class="main">
+
+  <!-- History Panel (shown for returning users) -->
+  <div class="history-panel" id="historyPanel">
+    <div class="history-header">
+      <span>&#128197; Your Past Audits</span>
+      <span id="historyUser" style="font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;"></span>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">No past audits yet — run your first one below!</div>
+    </div>
+  </div>
 
   <div class="upload-zone" id="dropZone">
     <input type="file" id="fileInput" accept=".pdf,.txt">
@@ -543,7 +649,10 @@
         <div class="score-label">Recruiter Readability Score</div>
         <div class="score-value" id="scoreValue">&mdash;</div>
       </div>
-      <div class="score-icon" id="scoreIcon">&mdash;</div>
+      <div>
+        <div class="score-icon" id="scoreIcon">&mdash;</div>
+        <div class="score-percent-badge" id="scorePercent"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -573,6 +682,21 @@
     </div>
 
     <button class="btn-reset" onclick="resetForm()">&larr; Start Over</button>
+  </div>
+
+  <!-- Sign In Gate (returning users) -->
+  <div class="email-gate" id="signinGate">
+    <div class="email-gate-box">
+      <div class="email-gate-icon">&#128075;&#127999;</div>
+      <h2>Welcome back.<br><em>Sign in to continue.</em></h2>
+      <p>Enter the email you used before to see your audit history.</p>
+      <div class="email-gate-fields">
+        <input type="email" id="signinEmail" placeholder="Your email address" autocomplete="email">
+      </div>
+      <button class="btn-unlock" onclick="submitSignin()">Sign In &rarr;</button>
+      <div class="email-gate-error" id="signinError"></div>
+      <button class="email-gate-skip" onclick="closeSignin()">Cancel</button>
+    </div>
   </div>
 
   <!-- Email Gate Modal -->
@@ -606,6 +730,24 @@
   const fileStatus = document.getElementById('fileStatus');
   let uploadedText = '';
   let pendingResults = null;
+
+  // Load Supabase config from Netlify
+  (async function loadConfig() {
+    try {
+      var res = await fetch('/.netlify/functions/getConfig');
+      var text = await res.text();
+      // Make sure we got JSON back not an HTML error page
+      if (!text || text.trim().startsWith('<')) {
+        console.warn('getConfig not deployed yet — history features disabled until deployed');
+        return;
+      }
+      var config = JSON.parse(text);
+      window.__SB_URL__ = config.supabaseUrl;
+      window.__SB_KEY__ = config.supabaseKey;
+    } catch(e) {
+      console.warn('Config load error — history disabled:', e.message);
+    }
+  })();
 
   // Drag and drop
   dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
@@ -770,10 +912,13 @@
 
   function skipEmailGate() {
     document.getElementById('emailGate').classList.remove('active');
+    currentUserEmail = email;
     if (pendingResults) {
       renderResults(pendingResults);
       pendingResults = null;
     }
+    // Load history after signup
+    loadHistory(email);
   }
 
   async function submitEmailGate() {
@@ -838,10 +983,19 @@
     var resumeText = (data.revisedResume || '').replace(/\\n/g, '\n');
     document.getElementById('revisedResume').textContent = resumeText;
 
+    // Score percent badge
+    var percent = scoreMap[score] || 45;
+    document.getElementById('scorePercent').textContent = percent + '% match';
+
     document.getElementById('results').classList.add('active');
     setTimeout(function() {
       document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
+
+    // Save to Supabase if we have an email
+    if (currentUserEmail) {
+      saveAuditToSupabase(currentUserEmail, data);
+    }
   }
 
   function copyResume() {
@@ -1077,6 +1231,120 @@
     document.getElementById('results').classList.remove('active');
     document.getElementById('errorBox').classList.remove('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── SCORE PERCENT ──
+  var scoreMap = {
+    'Recruiter Ready': 92,
+    'Strong': 78,
+    'Decent Foundation': 63,
+    'Needs Work': 45
+  };
+
+  var scoreClassMap = {
+    'Recruiter Ready': 'recruiter-ready',
+    'Strong': 'strong',
+    'Decent Foundation': 'decent',
+    'Needs Work': 'needs-work'
+  };
+
+  // ── CURRENT USER ──
+  var currentUserEmail = null;
+
+  // ── SAVE AUDIT TO SUPABASE ──
+  async function saveAuditToSupabase(email, auditData) {
+    try {
+      await fetch('/.netlify/functions/saveAudit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, auditData: auditData })
+      });
+    } catch (err) {
+      console.warn('Save audit error:', err.message);
+    }
+  }
+
+  // ── LOAD HISTORY ──
+  async function loadHistory(email) {
+    try {
+      var SUPABASE_URL = window.__SB_URL__ || '';
+      var SUPABASE_KEY = window.__SB_KEY__ || '';
+
+      var response = await fetch(
+        SUPABASE_URL + '/rest/v1/audits?email=eq.' + encodeURIComponent(email) + '&order=created_at.desc&limit=10',
+        {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          }
+        }
+      );
+      var audits = await response.json();
+      renderHistory(email, audits);
+    } catch (err) {
+      console.warn('Load history error:', err.message);
+    }
+  }
+
+  // ── RENDER HISTORY PANEL ──
+  function renderHistory(email, audits) {
+    var panel = document.getElementById('historyPanel');
+    var list = document.getElementById('historyList');
+    var userLabel = document.getElementById('historyUser');
+
+    userLabel.textContent = email;
+    list.innerHTML = '';
+
+    if (!audits || audits.length === 0) {
+      list.innerHTML = '<div class="history-empty">No past audits yet — run your first one below!</div>';
+    } else {
+      audits.forEach(function(audit) {
+        var date = new Date(audit.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        var percent = audit.score_percent || scoreMap[audit.score] || 45;
+        var scoreClass = scoreClassMap[audit.score] || 'needs-work';
+        var item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML =
+          '<div>' +
+            '<div class="history-score ' + scoreClass + '">' + (audit.score || 'Needs Work') + '</div>' +
+            '<div class="history-date">' + date + '</div>' +
+          '</div>' +
+          '<div class="history-percent">' + percent + '%</div>';
+        list.appendChild(item);
+      });
+    }
+
+    panel.classList.add('active');
+    currentUserEmail = email;
+  }
+
+  // ── SIGNIN GATE ──
+  function showSigninGate() {
+    document.getElementById('signinGate').classList.add('active');
+    setTimeout(function() {
+      document.getElementById('signinEmail').focus();
+    }, 100);
+  }
+
+  function closeSignin() {
+    document.getElementById('signinGate').classList.remove('active');
+    document.getElementById('signinError').textContent = '';
+  }
+
+  async function submitSignin() {
+    var email = document.getElementById('signinEmail').value.trim();
+    var errorEl = document.getElementById('signinError');
+    errorEl.textContent = '';
+
+    if (!email || !email.includes('@')) {
+      errorEl.textContent = 'Please enter a valid email address.';
+      errorEl.classList.add('active');
+      return;
+    }
+
+    document.getElementById('signinGate').classList.remove('active');
+    currentUserEmail = email;
+    loadHistory(email);
   }
 </script>
 
