@@ -460,15 +460,25 @@
   .btn-unlock:hover { background: #8559a8; transform: translateY(-1px); }
   .btn-unlock:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .email-gate-skip {
-    font-size: 12px;
-    color: #95897a;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent-deep);
     cursor: pointer;
-    text-decoration: underline;
-    background: none;
-    border: none;
+    text-decoration: none;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
     font-family: 'DM Sans', sans-serif;
+    padding: 12px 24px;
+    margin-top: 8px;
+    width: 100%;
+    transition: all 0.2s;
   }
-  .email-gate-skip:hover { color: #242424; }
+  .email-gate-skip:hover {
+    border-color: var(--accent-deep);
+    background: var(--surface);
+    transform: translateY(-1px);
+  }
   .email-gate-error {
     font-size: 13px;
     color: #e05252;
@@ -939,13 +949,12 @@
 
   function skipEmailGate() {
     document.getElementById('emailGate').classList.remove('active');
-    currentUserEmail = email;
+    // No email captured — guest session, no history
+    currentUserEmail = null;
     if (pendingResults) {
       renderResults(pendingResults);
       pendingResults = null;
     }
-    // Load history after signup
-    loadHistory(email);
   }
 
   async function submitEmailGate() {
