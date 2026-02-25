@@ -33,14 +33,24 @@ function supabaseRequest(path, method, body) {
 }
 
 // Convert score label to percentage
-function scoreToPercent(score) {
-  const map = {
-    "Recruiter Ready": 92,
-    "Strong": 78,
-    "Decent Foundation": 63,
-    "Needs Work": 45,
+function scoreToPercent(score, issues) {
+  // Base ranges per score label
+  const ranges = {
+    "Recruiter Ready": { min: 90, max: 99 },
+    "Strong":          { min: 75, max: 89 },
+    "Decent Foundation": { min: 60, max: 74 },
+    "Needs Work":      { min: 30, max: 59 },
   };
-  return map[score] || 45;
+  const range = ranges[score] || ranges["Needs Work"];
+
+  // Adjust within range based on number of critical issues
+  const criticalCount = (issues || []).filter(i => i.type === 'critical').length;
+  const warningCount  = (issues || []).filter(i => i.type === 'warning').length;
+  const penalty = (criticalCount * 4) + (warningCount * 2);
+  const raw = range.max - penalty;
+
+  // Clamp within range
+  return Math.min(range.max, Math.max(range.min, raw));
 }
 
 exports.handler = async function (event) {
@@ -88,7 +98,7 @@ exports.handler = async function (event) {
         user_id: userId,
         email,
         score: auditData.score,
-        score_percent: scoreToPercent(auditData.score),
+        score_percent: scoreToPercent(auditData.score, auditData.issues),
         issues: auditData.issues,
         ten_second_test: auditData.tenSecondTest,
         ats_notes: auditData.atsNotes,
