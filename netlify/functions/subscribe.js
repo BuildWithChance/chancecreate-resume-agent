@@ -42,54 +42,85 @@ exports.handler = async function (event) {
     const { email, name } = JSON.parse(event.body);
     if (!email) return { statusCode: 400, body: JSON.stringify({ error: "Email required" }) };
 
-    // 1. Save to Supabase users table (upsert so returning users don't error)
-    const supabaseRes = await supabaseRequest(
-      "/rest/v1/users",
-      "POST",
-      { email, name: name || null }
-    );
-
-    // 409 means user already exists — that's fine
-    const supabaseSuccess = supabaseRes.status === 201 || supabaseRes.status === 409;
-
-    // 2. Save to MailerLite
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
     const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
-    const mailPayload = JSON.stringify({
-      email,
-      fields: { name: name || "" },
-      groups: ["180310043648853210"],
-      status: "active",
-    });
 
-    await new Promise((resolve, reject) => {
+    // ── 1. CHECK if user already exists in Supabase ──
+    const hostname = SUPABASE_URL.replace("https://", "");
+    const checkRes = await new Promise((resolve, reject) => {
       const req = https.request(
         {
-          hostname: "connect.mailerlite.com",
-          path: "/api/subscribers",
-          method: "POST",
+          hostname,
+          path: `/rest/v1/users?email=eq.${encodeURIComponent(email)}&select=id`,
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${MAILERLITE_API_KEY}`,
-            "Content-Length": Buffer.byteLength(mailPayload),
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
           },
         },
         (res) => {
           let data = "";
           res.on("data", (chunk) => (data += chunk));
-          res.on("end", () => resolve(data));
+          res.on("end", () => resolve({ status: res.statusCode, body: data }));
         }
       );
       req.on("error", reject);
-      req.write(mailPayload);
       req.end();
     });
+
+    const existingUsers = JSON.parse(checkRes.body || "[]");
+    const isNewUser = existingUsers.length === 0;
+
+    // ── 2. INSERT new user into Supabase (only if new) ──
+    if (isNewUser) {
+      await supabaseRequest("/rest/v1/users", "POST", { email, name: name || null });
+    }
+
+    // ── 3. MailerLite — only subscribe NEW users to trigger automation ──
+    // Returning users won't re-trigger the welcome sequence
+    if (isNewUser) {
+      const mailPayload = JSON.stringify({
+        email,
+        fields: { name: name || "" },
+        groups: ["180310043648853210"],
+        status: "active",
+        resubscribe: false,
+      });
+
+      const mlRes = await new Promise((resolve, reject) => {
+        const req = https.request(
+          {
+            hostname: "connect.mailerlite.com",
+            path: "/api/subscribers",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${MAILERLITE_API_KEY}`,
+              "Content-Length": Buffer.byteLength(mailPayload),
+            },
+          },
+          (res) => {
+            let data = "";
+            res.on("data", (chunk) => (data += chunk));
+            res.on("end", () => resolve({ status: res.statusCode, body: data }));
+          }
+        );
+        req.on("error", reject);
+        req.write(mailPayload);
+        req.end();
+      });
+
+      console.log("MailerLite response:", mlRes.status, mlRes.body);
+    }
 
     return {
       statusCode: 200,
       headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ success: true }),
+      body: JSON.stringify({ success: true, isNewUser }),
     };
   } catch (err) {
+    console.error("Subscribe error:", err.message);
     return {
       statusCode: 500,
       headers: { "Access-Control-Allow-Origin": "*" },
