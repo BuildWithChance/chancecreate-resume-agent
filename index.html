@@ -561,19 +561,42 @@
     display: inline-block;
   }
 
-  /* SIGNIN LINK */
+  /* SIGNIN BAR */
   .signin-bar {
-    text-align: right;
-    padding: 8px 0 0;
-    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 12px 20px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .signin-bar-text {
+    font-size: 14px;
     color: var(--muted);
   }
   .signin-bar a {
+    font-size: 14px;
+    font-weight: 600;
     color: var(--accent-deep);
     text-decoration: none;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 16px;
+    background: white;
+    border: 1.5px solid var(--accent);
+    border-radius: 7px;
+    transition: all 0.2s;
   }
-  .signin-bar a:hover { text-decoration: underline; }
+  .signin-bar a:hover {
+    background: var(--accent-deep);
+    color: white;
+    border-color: var(--accent-deep);
+  }
 </style>
 </head>
 <body>
@@ -583,7 +606,8 @@
   <h1>Your Resume Should<br><em>Open Doors in 10 Seconds.</em></h1>
   <p class="subtitle">Upload your resume and get a recruiter's-eye audit plus a fully rewritten version — ATS-ready, impact-led, and built to pass the 10-second scan.</p>
   <div class="signin-bar" id="signinBar">
-    <a onclick="showSigninGate()">Returning? Sign in to see your history</a>
+    <span class="signin-bar-text">Already used this tool?</span>
+    <a onclick="showSigninGate()">&#128272; View your audit history</a>
   </div>
 </header>
 
