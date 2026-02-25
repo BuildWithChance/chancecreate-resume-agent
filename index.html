@@ -400,10 +400,10 @@
     width: 100%;
     text-align: center;
     box-shadow: 0 24px 60px rgba(36,36,36,0.18);
-    animation: popIn 0.25s ease;
+    animation: gateIn 0.25s ease;
     margin: auto;
   }
-  @keyframes popIn {
+  @keyframes gateIn {
     from { transform: scale(0.94); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
   }
@@ -495,180 +495,7 @@
     line-height: 1.6;
   }
 
-  /* HISTORY PANEL */
-  .history-panel {
-    display: none;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .history-panel.active { display: block; }
-  .history-header {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .history-header span {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent-deep);
-  }
-  .history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .history-item {
-    padding: 16px 22px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .history-item:last-child { border-bottom: none; }
-  .history-score {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 700;
-  }
-  .history-score.recruiter-ready { color: var(--success); }
-  .history-score.strong { color: var(--accent-deep); }
-  .history-score.decent { color: var(--warn); }
-  .history-score.needs-work { color: var(--danger); }
-  .history-date {
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .history-percent {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent-deep);
-    background: var(--surface2);
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-  .history-empty {
-    padding: 24px 22px;
-    font-size: 14px;
-    color: var(--muted);
-    text-align: center;
-  }
-
-  /* SCORE PERCENT BADGE */
-  .score-percent-badge {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent-deep);
-    background: var(--surface2);
-    padding: 4px 12px;
-    border-radius: 20px;
-    margin-top: 6px;
-    display: inline-block;
-  }
-
-  /* EMAIL GATE SUCCESS SCREEN */
-  .email-gate-success {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 20px 0;
-    gap: 12px;
-  }
-  .email-gate-success.active { display: flex; }
-  .email-gate-success-icon {
-    font-size: 48px;
-    animation: bounceIn 0.5s ease;
-  }
-  @keyframes bounceIn {
-    0% { transform: scale(0.5); opacity: 0; }
-    70% { transform: scale(1.1); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  .email-gate-success h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    color: var(--text);
-    margin: 0;
-  }
-  .email-gate-success h3 em {
-    color: var(--accent-deep);
-    font-style: normal;
-  }
-  .email-gate-success-msg {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 320px;
-  }
-  .email-gate-success-steps {
-    background: var(--surface2);
-    border-radius: 10px;
-    padding: 16px 20px;
-    width: 100%;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .email-gate-success-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--text);
-    line-height: 1.5;
-  }
-  .email-gate-success-step-num {
-    background: var(--accent-deep);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    margin-top: 1px;
-  }
-  .email-gate-success-cta {
-    font-size: 13px;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  /* OPTIONAL FIELDS HINT */
-  .optional-hint {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    line-height: 1.5;
-  }
-  .optional-hint-icon { font-size: 15px; flex-shrink: 0; }
-  .field-optional {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 400;
-    margin-left: 4px;
-  }
-
-  /* EMAIL GATE SUCCESS */
+  /* GATE SUCCESS STATE */
   .gate-success {
     display: none;
     flex-direction: column;
@@ -678,28 +505,16 @@
     padding: 8px 0;
   }
   .gate-success.active { display: flex; }
-  .gate-success-icon {
-    font-size: 44px;
-    animation: popIn 0.4s ease;
-  }
-  @keyframes popIn {
-    0%   { transform: scale(0.4); opacity: 0; }
-    70%  { transform: scale(1.15); }
-    100% { transform: scale(1); opacity: 1; }
-  }
+  .gate-success-icon { font-size: 44px; }
   .gate-success h3 {
-    font-family: "Playfair Display", serif;
+    font-family: 'Playfair Display', serif;
     font-size: 1.4rem;
     color: var(--text);
     margin: 0;
     line-height: 1.3;
   }
   .gate-success h3 em { color: var(--accent-deep); font-style: normal; }
-  .gate-success-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin: 0;
-  }
+  .gate-success-sub { font-size: 13px; color: var(--muted); margin: 0; }
   .gate-success-steps {
     background: var(--surface2);
     border-radius: 12px;
@@ -730,6 +545,7 @@
     font-size: 11px;
     font-weight: 700;
     margin-top: 1px;
+    flex-shrink: 0;
   }
   .gate-success-btn {
     background: var(--accent-deep);
@@ -745,17 +561,34 @@
     transition: all 0.2s;
     margin-top: 4px;
   }
-  .gate-success-btn:hover {
-    background: #8559a8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(155,109,187,0.3);
-  }
+  .gate-success-btn:hover { background: #8559a8; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(155,109,187,0.3); }
 
-  .gate-success-footer {
-    font-size: 12px;
+  /* OPTIONAL FIELDS HINT */
+  .optional-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
     color: var(--muted);
-    font-style: italic;
-    margin: 0;
+    line-height: 1.5;
+  }
+  .optional-hint-icon { font-size: 15px; flex-shrink: 0; }
+  .field-optional { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+
+  /* SCORE PERCENT BADGE */
+  .score-percent-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-deep);
+    background: var(--surface2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 6px;
+    display: inline-block;
   }
 
   /* GUEST SAVE PROMPT */
@@ -765,16 +598,10 @@
     border: 1.5px solid var(--accent);
     border-radius: var(--radius);
     padding: 20px 24px;
-    margin-bottom: 20px;
     text-align: center;
   }
   .guest-save-prompt.active { display: block; }
-  .guest-save-prompt p {
-    font-size: 14px;
-    color: var(--text);
-    margin: 0 0 14px 0;
-    line-height: 1.6;
-  }
+  .guest-save-prompt p { font-size: 14px; color: var(--text); margin: 0 0 14px 0; line-height: 1.6; }
   .guest-save-prompt p strong { color: var(--accent-deep); }
   .guest-save-prompt-btn {
     display: inline-flex;
@@ -791,11 +618,7 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .guest-save-prompt-btn:hover {
-    background: #8559a8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(155,109,187,0.3);
-  }
+  .guest-save-prompt-btn:hover { background: #8559a8; transform: translateY(-1px); }
   .guest-save-prompt-dismiss {
     display: block;
     margin-top: 10px;
@@ -820,10 +643,7 @@
     border-radius: 10px;
     border: 1px solid var(--border);
   }
-  .signin-bar-text {
-    font-size: 14px;
-    color: var(--muted);
-  }
+  .signin-bar-text { font-size: 14px; color: var(--muted); }
   .signin-bar a {
     font-size: 14px;
     font-weight: 600;
@@ -839,11 +659,189 @@
     border-radius: 7px;
     transition: all 0.2s;
   }
-  .signin-bar a:hover {
-    background: var(--accent-deep);
-    color: white;
-    border-color: var(--accent-deep);
+  .signin-bar a:hover { background: var(--accent-deep); color: white; border-color: var(--accent-deep); }
+
+  /* ── HISTORY PANEL ── */
+  .history-panel {
+    display: none;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
   }
+  .history-panel.active { display: block; }
+  .history-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .history-header-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+  }
+  .history-header-email { font-size: 12px; color: var(--muted); }
+  .history-list { display: flex; flex-direction: column; }
+
+  /* History Card */
+  .history-card { border-bottom: 1px solid var(--border); overflow: hidden; }
+  .history-card:last-child { border-bottom: none; }
+
+  .history-card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 12px;
+    user-select: none;
+  }
+  .history-card-header:hover { background: var(--surface2); }
+  .history-card-left { flex: 1; min-width: 0; }
+  .history-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+  }
+  .history-card-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .history-card-score.recruiter-ready { color: var(--success); }
+  .history-card-score.strong { color: var(--accent-deep); }
+  .history-card-score.decent { color: var(--warn); }
+  .history-card-score.needs-work { color: var(--danger); }
+  .history-card-percent {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+    background: var(--surface2);
+    color: var(--accent-deep);
+    border: 1px solid var(--border);
+  }
+  .history-card-role {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+  .history-card-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .history-card-date { font-size: 12px; color: var(--muted); }
+  .history-card-preview {
+    font-size: 12px;
+    color: var(--danger);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+  }
+  .history-card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .history-card-delta {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 8px;
+  }
+  .history-card-delta.up { color: var(--success); background: rgba(122,171,138,0.12); }
+  .history-card-delta.down { color: var(--danger); background: rgba(224,82,82,0.08); }
+  .history-card-chevron {
+    font-size: 11px;
+    color: var(--muted);
+    transition: transform 0.25s;
+    display: inline-block;
+  }
+  .history-card.open .history-card-chevron { transform: rotate(180deg); }
+
+  /* Expanded body */
+  .history-card-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+    background: #faf7fd;
+  }
+  .history-card.open .history-card-body { display: block; }
+  .history-card-section { margin-top: 16px; }
+  .history-card-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .history-issue-list { display: flex; flex-direction: column; gap: 7px; }
+  .history-issue {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .history-issue-tag {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+  .history-issue-tag.critical { background: rgba(224,82,82,0.1); color: var(--danger); }
+  .history-issue-tag.warning  { background: rgba(201,122,58,0.1); color: var(--warn); }
+  .history-issue-tag.tip      { background: rgba(122,171,138,0.1); color: var(--success); }
+
+  .history-resume-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-deep);
+    cursor: pointer;
+    background: none;
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    padding: 7px 14px;
+    margin-top: 4px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .history-resume-toggle:hover { background: var(--surface2); transform: translateY(-1px); }
+  .history-resume-box {
+    display: none;
+    margin-top: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    font-family: 'DM Sans', sans-serif;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .history-resume-box.open { display: block; }
+  .history-empty { padding: 24px 20px; font-size: 14px; color: var(--muted); text-align: center; }
 </style>
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -852,9 +850,9 @@
 <body>
 
 <header>
-  <p class="eyebrow">Chance Create · Free Resume Audit Tool</p>
+  <p class="eyebrow">Chance Create &middot; Free Resume Audit Tool</p>
   <h1>Your Resume Should<br><em>Open Doors in 10 Seconds.</em></h1>
-  <p class="subtitle">Upload your resume and get a recruiter's-eye audit plus a fully rewritten version — ATS-ready, impact-led, and built to pass the 10-second scan.</p>
+  <p class="subtitle">Upload your resume and get a recruiter's-eye audit plus a fully rewritten version &mdash; ATS-ready, impact-led, and built to pass the 10-second scan.</p>
   <div class="signin-bar" id="signinBar">
     <span class="signin-bar-text">Already used this tool?</span>
     <a onclick="showSigninGate()">&#128272; View your audit history</a>
@@ -866,19 +864,19 @@
   <!-- History Panel (shown for returning users) -->
   <div class="history-panel" id="historyPanel">
     <div class="history-header">
-      <span>&#128197; Your Past Audits</span>
-      <span id="historyUser" style="font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;"></span>
+      <span class="history-header-label">&#128198; Your Past Audits</span>
+      <span class="history-header-email" id="historyUser"></span>
     </div>
     <div class="history-list" id="historyList">
-      <div class="history-empty">No past audits yet — run your first one below!</div>
+      <div class="history-empty">No past audits yet &mdash; run your first one below!</div>
     </div>
   </div>
 
   <div class="upload-zone" id="dropZone">
     <input type="file" id="fileInput" accept=".pdf,.txt">
-    <div class="upload-icon">📄</div>
+    <div class="upload-icon">&#128196;</div>
     <h3>Drop your resume here or click to upload</h3>
-    <p>PDF or plain text (.txt) — max 5MB</p>
+    <p>PDF or plain text (.txt) &mdash; max 5MB</p>
     <p class="file-status" id="fileStatus"></p>
   </div>
 
@@ -910,7 +908,7 @@
     <input type="text" id="focusNote" placeholder="e.g. career gap, pivot from non-tech, ATS rejections">
   </div>
 
-  <!-- FUTURE: JD Match input — hidden until V3 feature is built -->
+  <!-- FUTURE: JD Match input — hidden until V3 -->
   <div id="jdMatchSection" style="display:none;">
     <div class="field">
       <label>Job Description <span class="field-optional">(paste to get a match score)</span></label>
@@ -931,7 +929,6 @@
   </div>
 
   <div class="results" id="results">
-    <!-- React Score Banner -->
     <div id="scoreBannerRoot"></div>
 
     <div class="card" data-section="issues">
@@ -949,14 +946,14 @@
       <div class="card-body" id="atsResult"></div>
     </div>
 
-    <!-- FUTURE SECTION: JD Match Score — hidden until V3 -->
-    <div class="card card-future" id="jdMatchCard" data-section="jd-match" style="display:none;">
+    <!-- FUTURE: JD Match — hidden until V3 -->
+    <div class="card" id="jdMatchCard" data-section="jd-match" style="display:none;">
       <div class="card-title">&#127919; Job Description Match</div>
       <div class="card-body" id="jdMatchResult"></div>
     </div>
 
-    <!-- FUTURE SECTION: Role Discovery — hidden until V3 -->
-    <div class="card card-future" id="roleDiscoveryCard" data-section="role-discovery" style="display:none;">
+    <!-- FUTURE: Role Discovery — hidden until V3 -->
+    <div class="card" id="roleDiscoveryCard" data-section="role-discovery" style="display:none;">
       <div class="card-title">&#128269; Roles You May Not Have Considered</div>
       <div class="card-body" id="roleDiscoveryResult"></div>
     </div>
@@ -972,7 +969,7 @@
       <div class="resume-output" id="revisedResume"></div>
     </div>
 
-    <!-- Guest save prompt — shown after skip -->
+    <!-- Guest save prompt -->
     <div class="guest-save-prompt" id="guestSavePrompt">
       <p>&#128190; <strong>Want to save this audit and track your progress?</strong><br>
       Create a free account with your email and see how your score improves over time.</p>
@@ -983,7 +980,7 @@
     <button class="btn-reset" onclick="resetForm()">&larr; Start Over</button>
   </div>
 
-  <!-- Sign In Gate (returning users) -->
+  <!-- Sign In Gate -->
   <div class="email-gate" id="signinGate">
     <div class="email-gate-box">
       <div class="email-gate-icon">&#128075;&#127999;</div>
@@ -1015,27 +1012,27 @@
       <button class="email-gate-skip" onclick="skipEmailGate()">No thanks, just show me the results</button>
       <p class="email-gate-privacy">No spam. Unsubscribe anytime. Your info stays with Chance Create&trade;.</p>
 
-      <!-- Success state - shown after email submitted -->
+      <!-- Success state -->
       <div class="gate-success" id="gateSuccess">
         <div class="gate-success-icon">&#127881;</div>
         <h3>You&#8217;re in, <em id="successFirstName">friend</em>!</h3>
-        <p class="gate-success-sub">Check your inbox &#8212; your Career Reinvention Roadmap is on its way.</p>
+        <p class="gate-success-sub">Check your inbox &mdash; your Career Reinvention Roadmap is on its way.</p>
         <div class="gate-success-steps">
           <div class="gate-success-step">
             <div class="gate-step-num">1</div>
-            <div><strong>Check your email</strong> &#8212; your free Career Reinvention Roadmap has recruiter insider tips you can use today.</div>
+            <div><strong>Check your email</strong> &mdash; your free Career Reinvention Roadmap has recruiter insider tips you can use today.</div>
           </div>
           <div class="gate-success-step">
             <div class="gate-step-num">2</div>
-            <div><strong>Start with critical issues</strong> &#8212; those are what&#8217;s costing you interviews right now.</div>
+            <div><strong>Start with critical issues</strong> &mdash; those are what&#8217;s costing you interviews right now.</div>
           </div>
           <div class="gate-success-step">
             <div class="gate-step-num">3</div>
-            <div><strong>Download your rewritten resume</strong> &#8212; it&#8217;s ATS-ready and built to pass the 10-second scan.</div>
+            <div><strong>Download your rewritten resume</strong> &mdash; it&#8217;s ATS-ready and built to pass the 10-second scan.</div>
           </div>
           <div class="gate-success-step">
             <div class="gate-step-num">4</div>
-            <div><strong>Come back anytime</strong> &#8212; sign in with this email to track your score over time.</div>
+            <div><strong>Come back anytime</strong> &mdash; sign in with this email to track your score over time.</div>
           </div>
         </div>
         <button class="gate-success-btn" onclick="closeSuccessAndShowResults()">
@@ -1057,26 +1054,23 @@
   const fileStatus = document.getElementById('fileStatus');
   let uploadedText = '';
   let pendingResults = null;
+  var currentUserEmail = null;
 
-  // Load Supabase config from Netlify
+  // ── CONFIG ──
   (async function loadConfig() {
     try {
       var res = await fetch('/.netlify/functions/getConfig');
       var text = await res.text();
-      // Make sure we got JSON back not an HTML error page
-      if (!text || text.trim().startsWith('<')) {
-        console.warn('getConfig not deployed yet — history features disabled until deployed');
-        return;
-      }
+      if (!text || text.trim().startsWith('<')) return;
       var config = JSON.parse(text);
       window.__SB_URL__ = config.supabaseUrl;
       window.__SB_KEY__ = config.supabaseKey;
     } catch(e) {
-      console.warn('Config load error — history disabled:', e.message);
+      console.warn('Config load error:', e.message);
     }
   })();
 
-  // Drag and drop
+  // ── FILE HANDLING ──
   dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
   dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
   dropZone.addEventListener('drop', function(e) {
@@ -1135,6 +1129,7 @@
     });
   }
 
+  // ── ANALYZE ──
   async function analyzeResume() {
     var pasteText = document.getElementById('resumeText').value.trim();
     var targetRole = document.getElementById('targetRole').value.trim();
@@ -1166,13 +1161,8 @@
 
       var data = await response.json();
       if (data.error) throw new Error(typeof data.error === 'object' ? JSON.stringify(data.error) : data.error);
-
-      // Handle Anthropic overloaded or API errors
       if (data.type === 'overloaded_error' || (data.error && data.error.type === 'overloaded_error')) {
-        throw new Error('The AI is experiencing high demand right now. Wait 30 seconds and try again — it usually clears up quickly.');
-      }
-      if (data.type === 'error' || (data.error && data.error.message)) {
-        throw new Error('API error: ' + (data.error.message || 'Please try again.'));
+        throw new Error('The AI is experiencing high demand right now. Wait 30 seconds and try again.');
       }
 
       var raw = (data.content || []).map(function(c) { return c.text || ''; }).join('');
@@ -1186,8 +1176,6 @@
         .replace(/\t/g, ' ');
 
       var parsed = JSON.parse(cleaned);
-
-      // Show email gate then render results
       showEmailGate(parsed);
 
     } catch (err) {
@@ -1199,6 +1187,7 @@
     }
   }
 
+  // ── PROMPT BUILDER ──
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
     var text = resumeText.slice(0, 4500);
     var prompt = 'Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\n';
@@ -1208,40 +1197,28 @@
     if (focusNote) prompt += 'SPECIAL FOCUS: ' + focusNote + '\n';
     prompt += '\nCRITICAL RULES — follow exactly:\n';
     prompt += '\n0. SCORE FIELD\n';
-    prompt += '   - The score field MUST be EXACTLY one of these four values (no variations):\n';
+    prompt += '   - The score field MUST be EXACTLY one of these four values:\n';
     prompt += '   - "Recruiter Ready" | "Strong" | "Decent Foundation" | "Needs Work"\n';
     prompt += '   - NEVER use: Good, Fair, Average, Poor, Excellent, Needs Improvement, or any other label\n';
     prompt += '\n1. COMPANY GROUPING\n';
     prompt += '   - Group all roles at the same company under ONE company name\n';
     prompt += '   - NEVER repeat the company name between roles\n';
-    prompt += '   - Format strictly: COMPANY NAME\\nTitle | City, State\\nStart – End\\n• bullet\\n\\nNext Title | City, State\\nStart – End\\n• bullet\n';
+    prompt += '   - Format: COMPANY NAME\\nTitle | City, State\\nStart – End\\n• bullet\\n\\nNext Title | City, State\\nStart – End\\n• bullet\n';
     prompt += '\n2. ROLE TITLE FORMAT\n';
-    prompt += '   - ALWAYS use a pipe character | between the job title and location\n';
+    prompt += '   - ALWAYS use a pipe | between job title and location\n';
     prompt += '   - Example: Customer Success Manager | Tampa, FL\n';
-    prompt += '   - NEVER write the title and location without the | separator\n';
-    prompt += '\n3. DATES\n';
-    prompt += '   - Always use an en dash: 2022 – 2024, not 2022 - 2024\n';
-    prompt += '   - Current role: 2024 – Present\n';
-    prompt += '\n4. OLDER / EARLY CAREER ROLES\n';
-    prompt += '   - If the resume has vague older experience (e.g. "Earlier Roles 2008-2017"), do NOT fabricate bullets\n';
-    prompt += '   - Instead write: [Earlier roles noted on original resume but not detailed — candidate should add specific titles, companies, and accomplishments for roles prior to YEAR]\n';
-    prompt += '   - Flag this in the issues array as a warning\n';
-    prompt += '\n5. EDUCATION\n';
-    prompt += '   - If no education is found, write: Not listed — add your degree, school, and graduation year\n';
-    prompt += '   - Flag this in the issues array as a warning\n';
-    prompt += '\n6. GENERAL\n';
-    prompt += '   - Section headers in ALL CAPS\n';
-    prompt += '   - Use • for all bullets\n';
-    prompt += '   - Use \\n for ALL line breaks inside JSON string values\n';
-    prompt += '   - Use – (en dash) not - (hyphen) for date ranges\n';
-    prompt += '\nReturn ONLY this JSON (no other text before or after):\n';
-    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue and why it matters"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt honest recruiter take on the first 10 seconds","atsNotes":"Specific ATS risks in this resume","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n2-3 sentence impact-focused summary\\n\\nEXPERIENCE\\n\\nCOMPANY NAME\\nMost Recent Title | City, State\\n2024 – Present\\n• bullet\\n• bullet\\n\\nPrevious Title | City, State\\n2022 – 2024\\n• bullet\\n• bullet\\n\\nSECOND COMPANY\\nTitle | City, State\\n2019 – 2022\\n• bullet\\n\\nEDUCATION\\nDegree, School, Year\\n\\nSKILLS\\nCategory: skill1, skill2, skill3"}';
+    prompt += '\n3. DATES — always use en dash: 2022 – 2024, not 2022 - 2024\n';
+    prompt += '\n4. OLDER ROLES — do NOT fabricate bullets for vague older experience\n';
+    prompt += '\n5. EDUCATION — if none found, flag as warning\n';
+    prompt += '\n6. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
+    prompt += '\nReturn ONLY this JSON:\n';
+    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt recruiter take","atsNotes":"ATS risks","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n...\\n\\nEXPERIENCE\\n...\\n\\nEDUCATION\\n...\\n\\nSKILLS\\n..."}';
     return prompt;
   }
 
-  // EMAIL GATE
+  // ── EMAIL GATE ──
   function showEmailGate(data) {
-    // Returning user — already have their email, skip gate entirely
+    // Returning user — skip gate
     if (currentUserEmail) {
       renderResults(data);
       saveAuditToSupabase(currentUserEmail, data);
@@ -1251,20 +1228,18 @@
     pendingResults = data;
     document.getElementById('emailGate').classList.add('active');
     setTimeout(function() {
-      var nameField = document.getElementById('gateName');
-      if (nameField) nameField.focus();
+      var f = document.getElementById('gateName');
+      if (f) f.focus();
     }, 100);
   }
 
   function skipEmailGate() {
     document.getElementById('emailGate').classList.remove('active');
-    // No email captured — guest session, no history
     currentUserEmail = null;
     if (pendingResults) {
       renderResults(pendingResults);
       pendingResults = null;
     }
-    // Show save prompt after a short delay so results render first
     setTimeout(showGuestSavePrompt, 800);
   }
 
@@ -1296,36 +1271,28 @@
       if (!data.success) throw new Error(data.error || 'Subscription failed');
     } catch (err) {
       console.warn('Subscribe error:', err.message);
-      // Still show results even if subscribe fails
+      // Still proceed even if subscribe fails
     }
 
     // Show success screen
-    var nameVal = document.getElementById('gateName').value.trim();
-    var firstName = nameVal ? nameVal.split(' ')[0] : 'friend';
+    var firstName = name ? name.split(' ')[0] : 'friend';
     document.getElementById('successFirstName').textContent = firstName;
 
-    // Target the correct gate box (email gate, not signin gate)
     var gateBox = document.querySelector('#emailGate .email-gate-box');
     Array.from(gateBox.children).forEach(function(el) {
       if (el.id !== 'gateSuccess') el.style.display = 'none';
     });
     document.getElementById('gateSuccess').classList.add('active');
 
-    // Store email for when user clicks close
-    window._pendingGateEmail = document.getElementById('gateEmail').value.trim();
-
-    // Reset unlock button for future use
-    var btn = document.getElementById('unlockBtn');
-    if (btn) { btn.disabled = false; btn.textContent = 'Unlock My Resume Audit →'; }
+    window._pendingGateEmail = email;
+    unlockBtn.disabled = false;
+    unlockBtn.textContent = 'Unlock My Resume Audit \u2192';
   }
 
   function closeSuccessAndShowResults() {
     var capturedEmail = window._pendingGateEmail || '';
-    // Reset gate children for future use
     var gateBox = document.querySelector('#emailGate .email-gate-box');
-    Array.from(gateBox.children).forEach(function(el) {
-      el.style.display = '';
-    });
+    Array.from(gateBox.children).forEach(function(el) { el.style.display = ''; });
     document.getElementById('gateSuccess').classList.remove('active');
     document.getElementById('emailGate').classList.remove('active');
     currentUserEmail = capturedEmail;
@@ -1334,34 +1301,26 @@
       pendingResults = null;
     }
     if (capturedEmail) loadHistory(capturedEmail);
-    // Scroll to results smoothly
     setTimeout(function() {
-      var results = document.getElementById('results');
-      if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var r = document.getElementById('results');
+      if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 150);
   }
 
+  // ── RENDER RESULTS ──
   function renderResults(data) {
-    // Normalize score label in case AI returns variations
     var rawScore = data.score || 'Needs Work';
     var scoreNormMap = {
-      'Good': 'Decent Foundation',
-      'Decent': 'Decent Foundation',
-      'Needs Improvement': 'Needs Work',
-      'Excellent': 'Recruiter Ready',
-      'Outstanding': 'Recruiter Ready',
-      'Average': 'Decent Foundation',
-      'Fair': 'Needs Work',
-      'Poor': 'Needs Work',
+      'Good': 'Decent Foundation', 'Decent': 'Decent Foundation',
+      'Needs Improvement': 'Needs Work', 'Excellent': 'Recruiter Ready',
+      'Outstanding': 'Recruiter Ready', 'Average': 'Decent Foundation',
+      'Fair': 'Needs Work', 'Poor': 'Needs Work'
     };
     var score = scoreNormMap[rawScore] || rawScore;
     var icons = { 'Recruiter Ready': '🟢', 'Strong': '🟣', 'Decent Foundation': '🟡', 'Needs Work': '🔴' };
     var percent = calcScorePercent(score, data.issues);
 
-    // Render React score banner with count-up animation
-    if (window.renderScoreBanner) {
-      window.renderScoreBanner(score, percent, icons[score] || '🔴');
-    }
+    if (window.renderScoreBanner) window.renderScoreBanner(score, percent, icons[score] || '🔴');
 
     var issueList = document.getElementById('issueList');
     issueList.innerHTML = '';
@@ -1374,23 +1333,17 @@
 
     document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
     document.getElementById('atsResult').textContent = data.atsNotes || '';
-
-    var resumeText = (data.revisedResume || '').replace(/\\n/g, '\n');
-    document.getElementById('revisedResume').textContent = resumeText;
-
-
+    document.getElementById('revisedResume').textContent = (data.revisedResume || '').replace(/\\n/g, '\n');
 
     document.getElementById('results').classList.add('active');
     setTimeout(function() {
       document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
-    // Save to Supabase if we have an email
-    if (currentUserEmail) {
-      saveAuditToSupabase(currentUserEmail, data);
-    }
+    if (currentUserEmail) saveAuditToSupabase(currentUserEmail, data);
   }
 
+  // ── COPY / DOWNLOAD ──
   function copyResume() {
     var text = document.getElementById('revisedResume').textContent;
     navigator.clipboard.writeText(text).then(function() {
@@ -1405,236 +1358,104 @@
     var text = document.getElementById('revisedResume').textContent;
     var lines = text.split('\n');
     var nameRaw = lines[0].trim().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_') || 'resume';
-
     var jsPDF = window.jspdf.jsPDF;
     var doc = new jsPDF({ unit: 'pt', format: 'letter' });
-
-    var marginX = 54;
-    var marginY = 54;
+    var marginX = 54, marginY = 54;
     var pageWidth = doc.internal.pageSize.getWidth();
     var pageHeight = doc.internal.pageSize.getHeight();
     var contentWidth = pageWidth - marginX * 2;
     var y = marginY;
-
-    // Track context
     var lineIndex = 0;
     var inExperience = false;
     var lastWasCompany = false;
     var lastWasSectionHeader = false;
+    var sectionHeaders = ['EXPERIENCE','EDUCATION','SKILLS','SUMMARY','CERTIFICATIONS','PROJECTS','AWARDS','VOLUNTEER','PUBLICATIONS'];
 
-    function checkPage(needed) {
-      if (y + needed > pageHeight - marginY) {
-        doc.addPage();
-        y = marginY;
-      }
-    }
+    function checkPage(needed) { if (y + needed > pageHeight - marginY) { doc.addPage(); y = marginY; } }
+    function isAllCaps(s) { return s.length >= 2 && s === s.toUpperCase() && /^[A-Z0-9\s&\/\-,\.]+$/.test(s) && /[A-Z]/.test(s); }
+    function isDateLine(s) { return /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{4})/i.test(s) || /\d{4}\s*[-–]\s*(Present|\d{4})/i.test(s); }
+    function isRoleTitle(s) { return s.includes('|') && s.length < 100; }
+    function isBullet(s) { return s.startsWith('•') || s.startsWith('-') || s.startsWith('·'); }
 
-    function isAllCaps(str) {
-      return str.length >= 2 &&
-             str === str.toUpperCase() &&
-             /^[A-Z0-9\s&\/\-,\.]+$/.test(str) &&
-             /[A-Z]/.test(str);
-    }
-
-    function isDateLine(str) {
-      return /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|\d{4})/i.test(str) ||
-             /\d{4}\s*[-–]\s*(Present|\d{4})/i.test(str);
-    }
-
-    function isRoleTitle(str) {
-      // Has | separator (Title | Location) or is a job title pattern
-      return str.includes('|') && str.length < 100;
-    }
-
-    function isBullet(str) {
-      return str.startsWith('•') || str.startsWith('-') || str.startsWith('·');
-    }
-
-    // Section headers known to reset context
-    var sectionHeaders = ['EXPERIENCE', 'EDUCATION', 'SKILLS', 'SUMMARY', 'CERTIFICATIONS', 'PROJECTS', 'AWARDS', 'VOLUNTEER', 'PUBLICATIONS'];
-
-    lines.forEach(function(line, idx) {
+    lines.forEach(function(line) {
       var trimmed = line.trim();
-
-      // ── NAME (first non-empty line) ──
       if (lineIndex === 0 && trimmed) {
         lineIndex++;
-        doc.setFont('times', 'bold');
-        doc.setFontSize(20);
-        doc.setTextColor(36, 36, 36);
-        checkPage(30);
-        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
-        y += 8;
-        // Thin accent line under name
-        doc.setDrawColor(155, 109, 187);
-        doc.setLineWidth(1.5);
-        doc.line(marginX + 40, y + 4, pageWidth - marginX - 40, y + 4);
-        y += 14;
-        return;
+        doc.setFont('times','bold'); doc.setFontSize(20); doc.setTextColor(36,36,36);
+        checkPage(30); doc.text(trimmed, pageWidth/2, y, {align:'center'}); y += 8;
+        doc.setDrawColor(155,109,187); doc.setLineWidth(1.5); doc.line(marginX+40, y+4, pageWidth-marginX-40, y+4); y += 14; return;
       }
-
-      // ── CONTACT LINE (second non-empty line) ──
       if (lineIndex === 1 && trimmed && !isBullet(trimmed)) {
         lineIndex++;
-        doc.setFont('times', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(110, 100, 95);
-        checkPage(14);
-        doc.text(trimmed, pageWidth / 2, y, { align: 'center' });
-        y += 20;
-        return;
+        doc.setFont('times','normal'); doc.setFontSize(9); doc.setTextColor(110,100,95);
+        checkPage(14); doc.text(trimmed, pageWidth/2, y, {align:'center'}); y += 20; return;
       }
-
-      // ── EMPTY LINE ──
-      if (!trimmed) {
-        y += lastWasCompany ? 2 : 5;
-        lastWasCompany = false;
-        return;
-      }
-
+      if (!trimmed) { y += lastWasCompany ? 2 : 5; lastWasCompany = false; return; }
       lineIndex++;
-
-      // ── SECTION HEADERS (ALL CAPS known sections or all-caps short lines) ──
-      var isSectionHeader = sectionHeaders.some(function(s) { return trimmed === s; }) ||
-                            (isAllCaps(trimmed) && trimmed.length < 40 && !isDateLine(trimmed));
-
+      var isSectionHeader = sectionHeaders.some(function(s) { return trimmed === s; }) || (isAllCaps(trimmed) && trimmed.length < 40 && !isDateLine(trimmed));
       if (isSectionHeader) {
-        y += lastWasSectionHeader ? 6 : 14;
-        checkPage(24);
-        // Purple label
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(120, 70, 160);
-        doc.text(trimmed, marginX, y);
-        // Full-width lavender rule
-        doc.setDrawColor(206, 177, 221);
-        doc.setLineWidth(0.6);
-        doc.line(marginX, y + 4, pageWidth - marginX, y + 4);
-        y += 16;
-        inExperience = (trimmed === 'EXPERIENCE');
-        lastWasCompany = false;
-        lastWasSectionHeader = true;
-        return;
+        y += lastWasSectionHeader ? 6 : 14; checkPage(24);
+        doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(120,70,160); doc.text(trimmed, marginX, y);
+        doc.setDrawColor(206,177,221); doc.setLineWidth(0.6); doc.line(marginX, y+4, pageWidth-marginX, y+4); y += 16;
+        inExperience = (trimmed === 'EXPERIENCE'); lastWasCompany = false; lastWasSectionHeader = true; return;
       }
-
       lastWasSectionHeader = false;
-
-      // ── COMPANY NAME (all-caps line in experience that isn't a date or section header) ──
       if (inExperience && isAllCaps(trimmed) && !isDateLine(trimmed)) {
-        y += 10;
-        checkPage(18);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10.5);
-        doc.setTextColor(36, 36, 36);
-        doc.text(trimmed, marginX, y);
-        y += 14;
-        lastWasCompany = true;
-        return;
+        y += 10; checkPage(18);
+        doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(36,36,36); doc.text(trimmed, marginX, y); y += 14; lastWasCompany = true; return;
       }
-
-      // ── DATE LINE ──
       if (isDateLine(trimmed)) {
-        checkPage(13);
-        doc.setFont('times', 'italic');
-        doc.setFontSize(9);
-        doc.setTextColor(120, 112, 105);
-        doc.text(trimmed, marginX + 10, y);
-        y += 13;
-        lastWasCompany = false;
-        return;
+        checkPage(13); doc.setFont('times','italic'); doc.setFontSize(9); doc.setTextColor(120,112,105); doc.text(trimmed, marginX+10, y); y += 13; lastWasCompany = false; return;
       }
-
-      // ── ROLE TITLE (contains | separator) ──
       if (isRoleTitle(trimmed)) {
-        var topPad = lastWasCompany ? 0 : 8;
-        y += topPad;
-        checkPage(15);
-        doc.setFont('times', 'bold');
-        doc.setFontSize(10.5);
-        doc.setTextColor(36, 36, 36);
-        // Split title and location for right-alignment of location
-        var parts = trimmed.split('|');
-        var titlePart = parts[0].trim();
-        var locPart = parts.slice(1).join('|').trim();
-        doc.text(titlePart, marginX + 10, y);
-        if (locPart) {
-          doc.setFont('times', 'normal');
-          doc.setFontSize(9.5);
-          doc.setTextColor(120, 112, 105);
-          doc.text(locPart, pageWidth - marginX, y, { align: 'right' });
-        }
-        y += 14;
-        lastWasCompany = false;
-        return;
+        y += lastWasCompany ? 0 : 8; checkPage(15);
+        doc.setFont('times','bold'); doc.setFontSize(10.5); doc.setTextColor(36,36,36);
+        var parts = trimmed.split('|'); var titlePart = parts[0].trim(); var locPart = parts.slice(1).join('|').trim();
+        doc.text(titlePart, marginX+10, y);
+        if (locPart) { doc.setFont('times','normal'); doc.setFontSize(9.5); doc.setTextColor(120,112,105); doc.text(locPart, pageWidth-marginX, y, {align:'right'}); }
+        y += 14; lastWasCompany = false; return;
       }
-
-      // ── BULLET ──
       if (isBullet(trimmed)) {
         var bulletText = trimmed.substring(1).trim();
-        doc.setFont('times', 'normal');
-        doc.setFontSize(10);
-        doc.setTextColor(50, 44, 40);
+        doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(50,44,40);
         var wrapped = doc.splitTextToSize(bulletText, contentWidth - 22);
         wrapped.forEach(function(wline, i) {
           checkPage(13.5);
-          if (i === 0) {
-            doc.setTextColor(155, 109, 187);
-            doc.text('•', marginX + 10, y);
-            doc.setTextColor(50, 44, 40);
-            doc.text(wline, marginX + 20, y);
-          } else {
-            doc.text(wline, marginX + 20, y);
-          }
+          if (i === 0) { doc.setTextColor(155,109,187); doc.text('•', marginX+10, y); doc.setTextColor(50,44,40); doc.text(wline, marginX+20, y); }
+          else { doc.text(wline, marginX+20, y); }
           y += 13.5;
         });
-        y += 1.5;
-        lastWasCompany = false;
-        return;
+        y += 1.5; lastWasCompany = false; return;
       }
-
-      // ── EVERYTHING ELSE (paragraph text, skills, etc.) ──
-      doc.setFont('times', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor(50, 44, 40);
-      var wrapped = doc.splitTextToSize(trimmed, contentWidth);
-      wrapped.forEach(function(wline) {
-        checkPage(14);
-        doc.text(wline, marginX, y);
-        y += 14;
-      });
+      doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(50,44,40);
+      var wrapped2 = doc.splitTextToSize(trimmed, contentWidth);
+      wrapped2.forEach(function(wline) { checkPage(14); doc.text(wline, marginX, y); y += 14; });
       lastWasCompany = false;
     });
-
     doc.save(nameRaw + '_rewritten.pdf');
     var btn = document.getElementById('downloadBtn');
-    btn.textContent = '✓ Downloaded!';
-    btn.classList.add('success');
+    btn.textContent = '✓ Downloaded!'; btn.classList.add('success');
     setTimeout(function() { btn.textContent = '⬇ Download PDF'; btn.classList.remove('success'); }, 2500);
   }
 
   // ── GUEST SAVE PROMPT ──
   function showGuestSavePrompt() {
-    var prompt = document.getElementById('guestSavePrompt');
-    if (prompt) prompt.classList.add('active');
+    var p = document.getElementById('guestSavePrompt');
+    if (p) p.classList.add('active');
   }
-
   function dismissSavePrompt() {
-    var prompt = document.getElementById('guestSavePrompt');
-    if (prompt) prompt.classList.remove('active');
+    var p = document.getElementById('guestSavePrompt');
+    if (p) p.classList.remove('active');
   }
-
   function showGuestSignup() {
-    // Reuse the email gate as a signup prompt
     dismissSavePrompt();
     document.getElementById('emailGate').classList.add('active');
-    // Update heading to reflect context
-    var gateHeading = document.querySelector('#emailGate h2');
-    if (gateHeading) gateHeading.innerHTML = 'Save your audit.<br><em>It only takes a second.</em>';
-    setTimeout(function() {
-      document.getElementById('gateName').focus();
-    }, 100);
+    var h = document.querySelector('#emailGate h2');
+    if (h) h.innerHTML = 'Save your audit.<br><em>It only takes a second.</em>';
+    setTimeout(function() { document.getElementById('gateName').focus(); }, 100);
   }
 
+  // ── RESET ──
   function resetForm() {
     uploadedText = '';
     pendingResults = null;
@@ -1651,48 +1472,34 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ── SCORE PERCENT ──
+  // ── SCORING ──
   var scoreRanges = {
-    'Recruiter Ready':    { min: 90, max: 99 },
-    'Strong':             { min: 75, max: 89 },
-    'Decent Foundation':  { min: 60, max: 74 },
-    'Needs Work':         { min: 30, max: 59 }
+    'Recruiter Ready': { min: 90, max: 99 },
+    'Strong':          { min: 75, max: 89 },
+    'Decent Foundation': { min: 60, max: 74 },
+    'Needs Work':      { min: 30, max: 59 }
   };
-
-  // Fallback flat map for history panel (no issues data)
-  var scoreMap = {
-    'Recruiter Ready': 92,
-    'Strong': 78,
-    'Decent Foundation': 63,
-    'Needs Work': 45
-  };
+  var scoreMap = { 'Recruiter Ready': 92, 'Strong': 78, 'Decent Foundation': 63, 'Needs Work': 45 };
+  var scoreClassMap = { 'Recruiter Ready': 'recruiter-ready', 'Strong': 'strong', 'Decent Foundation': 'decent', 'Needs Work': 'needs-work' };
 
   function calcScorePercent(score, issues) {
     var range = scoreRanges[score] || scoreRanges['Needs Work'];
     var criticalCount = (issues || []).filter(function(i) { return i.type === 'critical'; }).length;
     var warningCount  = (issues || []).filter(function(i) { return i.type === 'warning'; }).length;
     var penalty = (criticalCount * 4) + (warningCount * 2);
-    var raw = range.max - penalty;
-    return Math.min(range.max, Math.max(range.min, raw));
+    return Math.min(range.max, Math.max(range.min, range.max - penalty));
   }
 
-  var scoreClassMap = {
-    'Recruiter Ready': 'recruiter-ready',
-    'Strong': 'strong',
-    'Decent Foundation': 'decent',
-    'Needs Work': 'needs-work'
-  };
-
-  // ── CURRENT USER ──
-  var currentUserEmail = null;
-
-  // ── SAVE AUDIT TO SUPABASE ──
+  // ── SAVE AUDIT ──
   async function saveAuditToSupabase(email, auditData) {
     try {
+      var targetRole = document.getElementById('targetRole')
+        ? document.getElementById('targetRole').value.trim() : '';
+      var enriched = Object.assign({}, auditData, { targetRole: targetRole || null });
       await fetch('/.netlify/functions/saveAudit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, auditData: auditData })
+        body: JSON.stringify({ email: email, auditData: enriched })
       });
     } catch (err) {
       console.warn('Save audit error:', err.message);
@@ -1704,15 +1511,10 @@
     try {
       var SUPABASE_URL = window.__SB_URL__ || '';
       var SUPABASE_KEY = window.__SB_KEY__ || '';
-
+      if (!SUPABASE_URL) return;
       var response = await fetch(
-        SUPABASE_URL + '/rest/v1/audits?email=eq.' + encodeURIComponent(email) + '&order=created_at.desc&limit=10',
-        {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY
-          }
-        }
+        SUPABASE_URL + '/rest/v1/audits?email=eq.' + encodeURIComponent(email) + '&order=created_at.desc&limit=20',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
       );
       var audits = await response.json();
       renderHistory(email, audits);
@@ -1721,164 +1523,202 @@
     }
   }
 
-  // ── RENDER HISTORY PANEL ──
+  // ── RENDER HISTORY ──
   function renderHistory(email, audits) {
     var panel = document.getElementById('historyPanel');
     var list = document.getElementById('historyList');
-    var userLabel = document.getElementById('historyUser');
-
-    userLabel.textContent = email;
+    document.getElementById('historyUser').textContent = email;
     list.innerHTML = '';
+    currentUserEmail = email;
 
     if (!audits || audits.length === 0) {
-      list.innerHTML = '<div class="history-empty">No past audits yet — run your first one below!</div>';
-    } else {
-      audits.forEach(function(audit) {
-        var date = new Date(audit.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        var percent = audit.score_percent || scoreMap[audit.score] || 45;
-        var scoreClass = scoreClassMap[audit.score] || 'needs-work';
-        var item = document.createElement('div');
-        item.className = 'history-item';
-        item.innerHTML =
-          '<div>' +
-            '<div class="history-score ' + scoreClass + '">' + (audit.score || 'Needs Work') + '</div>' +
-            '<div class="history-date">' + date + '</div>' +
-          '</div>' +
-          '<div class="history-percent">' + percent + '%</div>';
-        list.appendChild(item);
-      });
+      list.innerHTML = '<div class="history-empty">No past audits yet &mdash; run your first one below!</div>';
+      panel.classList.add('active');
+      return;
     }
 
+    // Sort ascending for delta calc
+    var sorted = audits.slice().sort(function(a, b) { return new Date(a.created_at) - new Date(b.created_at); });
+    var percents = sorted.map(function(a) { return a.score_percent || scoreMap[a.score] || 45; });
+
+    // Render newest first
+    sorted.slice().reverse().forEach(function(audit) {
+      var origIdx = sorted.indexOf(audit);
+      var percent = percents[origIdx];
+      var prevPercent = origIdx > 0 ? percents[origIdx - 1] : null;
+      var delta = prevPercent !== null ? percent - prevPercent : null;
+
+      var date = new Date(audit.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      var scoreClass = scoreClassMap[audit.score] || 'needs-work';
+      var issues = audit.issues || [];
+      var topCritical = issues.find(function(i) { return i.type === 'critical'; });
+
+      // Delta badge
+      var deltaHtml = '';
+      if (delta !== null) {
+        var sign = delta >= 0 ? '+' : '';
+        var cls = delta >= 0 ? 'up' : 'down';
+        deltaHtml = '<span class="history-card-delta ' + cls + '">' + sign + delta + 'pts</span>';
+      }
+
+      // Issues list
+      var issuesHtml = issues.length > 0
+        ? '<div class="history-issue-list">' + issues.map(function(issue) {
+            return '<div class="history-issue"><span class="history-issue-tag ' + (issue.type||'tip') + '">' + (issue.type||'tip') + '</span><span>' + escapeHtml(issue.text) + '</span></div>';
+          }).join('') + '</div>'
+        : '<p style="font-size:13px;color:var(--muted)">No issues recorded.</p>';
+
+      // Resume text
+      var resumeText = (audit.revised_resume || '').replace(/\\n/g, '\n');
+      var cardId = 'hcard-' + (audit.id || origIdx);
+      var resumeId = 'hresume-' + (audit.id || origIdx);
+
+      var card = document.createElement('div');
+      card.className = 'history-card';
+      card.id = cardId;
+      card.innerHTML =
+        '<div class="history-card-header" onclick="toggleHistoryCard(\'' + cardId + '\')">' +
+          '<div class="history-card-left">' +
+            '<div class="history-card-top">' +
+              '<span class="history-card-score ' + scoreClass + '">' + escapeHtml(audit.score || 'Needs Work') + '</span>' +
+              '<span class="history-card-percent">' + percent + '%</span>' +
+              (audit.target_role ? '<span class="history-card-role">' + escapeHtml(audit.target_role) + '</span>' : '') +
+            '</div>' +
+            '<div class="history-card-meta">' +
+              '<span class="history-card-date">' + date + '</span>' +
+              (topCritical ? '<span class="history-card-preview">\u26a0 ' + escapeHtml(topCritical.text.substring(0,65)) + (topCritical.text.length > 65 ? '...' : '') + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="history-card-right">' + deltaHtml + '<span class="history-card-chevron">\u25bc</span></div>' +
+        '</div>' +
+        '<div class="history-card-body">' +
+          '<div class="history-card-section">' +
+            '<div class="history-card-section-title">Issues Found</div>' +
+            issuesHtml +
+          '</div>' +
+          (resumeText ? (
+            '<div class="history-card-section">' +
+              '<button class="history-resume-toggle" onclick="toggleHistoryResume(\'' + resumeId + '\', this)">' +
+                '\uD83D\uDCC4 View Rewritten Resume' +
+              '</button>' +
+              '<div class="history-resume-box" id="' + resumeId + '">' + escapeHtml(resumeText) + '</div>' +
+            '</div>'
+          ) : '') +
+        '</div>';
+
+      list.appendChild(card);
+    });
+
     panel.classList.add('active');
-    currentUserEmail = email;
+  }
+
+  function toggleHistoryCard(cardId) {
+    var card = document.getElementById(cardId);
+    if (card) card.classList.toggle('open');
+  }
+
+  function toggleHistoryResume(resumeId, btn) {
+    var box = document.getElementById(resumeId);
+    if (!box) return;
+    box.classList.toggle('open');
+    btn.textContent = box.classList.contains('open') ? '\uD83D\uDCC4 Hide Rewritten Resume' : '\uD83D\uDCC4 View Rewritten Resume';
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   // ── SIGNIN GATE ──
   function showSigninGate() {
     document.getElementById('signinGate').classList.add('active');
-    setTimeout(function() {
-      document.getElementById('signinEmail').focus();
-    }, 100);
+    setTimeout(function() { document.getElementById('signinEmail').focus(); }, 100);
   }
-
   function closeSignin() {
     document.getElementById('signinGate').classList.remove('active');
     document.getElementById('signinError').textContent = '';
   }
-
   async function submitSignin() {
     var email = document.getElementById('signinEmail').value.trim();
     var errorEl = document.getElementById('signinError');
     errorEl.textContent = '';
-
     if (!email || !email.includes('@')) {
       errorEl.textContent = 'Please enter a valid email address.';
       errorEl.classList.add('active');
       return;
     }
-
     document.getElementById('signinGate').classList.remove('active');
     currentUserEmail = email;
     loadHistory(email);
   }
 </script>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+<script type="text/babel">
+  const { useState, useEffect } = React;
 
-    function ScoreBanner({ score, percent, icon }) {
-      const [animated, setAnimated] = useState(false);
-      const [displayPercent, setDisplayPercent] = useState(0);
+  function ScoreBanner({ score, percent, icon }) {
+    const [animated, setAnimated] = useState(false);
+    const [displayPercent, setDisplayPercent] = useState(0);
 
-      const classMap = {
-        'Recruiter Ready': 'recruiter-ready',
-        'Strong': 'strong',
-        'Decent Foundation': 'decent',
-        'Needs Work': 'needs-work'
-      };
+    const classMap = {
+      'Recruiter Ready': 'recruiter-ready', 'Strong': 'strong',
+      'Decent Foundation': 'decent', 'Needs Work': 'needs-work'
+    };
+    const colorMap = {
+      'Recruiter Ready': '#7aab8a', 'Strong': '#9b6dbb',
+      'Decent Foundation': '#c97a3a', 'Needs Work': '#e05252'
+    };
 
-      const colorMap = {
-        'Recruiter Ready': '#7aab8a',
-        'Strong': '#9b6dbb',
-        'Decent Foundation': '#c97a3a',
-        'Needs Work': '#e05252'
-      };
+    useEffect(() => {
+      if (!score) return;
+      setAnimated(false); setDisplayPercent(0);
+      const timer = setTimeout(() => setAnimated(true), 50);
+      let start = 0;
+      const step = (percent / 1000) * 16;
+      const counter = setInterval(() => {
+        start += step;
+        if (start >= percent) { setDisplayPercent(percent); clearInterval(counter); }
+        else { setDisplayPercent(Math.floor(start)); }
+      }, 16);
+      return () => { clearTimeout(timer); clearInterval(counter); };
+    }, [score, percent]);
 
-      useEffect(() => {
-        if (!score) return;
-        setAnimated(false);
-        setDisplayPercent(0);
-        const timer = setTimeout(() => setAnimated(true), 50);
+    if (!score) return null;
+    const color = colorMap[score] || '#e05252';
 
-        // Count up animation
-        let start = 0;
-        const duration = 1000;
-        const step = (percent / duration) * 16;
-        const counter = setInterval(() => {
-          start += step;
-          if (start >= percent) {
-            setDisplayPercent(percent);
-            clearInterval(counter);
-          } else {
-            setDisplayPercent(Math.floor(start));
-          }
-        }, 16);
-
-        return () => { clearTimeout(timer); clearInterval(counter); };
-      }, [score, percent]);
-
-      if (!score) return null;
-
-      const bannerClass = classMap[score] || 'needs-work';
-      const color = colorMap[score] || '#e05252';
-
-      return (
-        <div className={`score-banner ${bannerClass}`} style={{
-          opacity: animated ? 1 : 0,
-          transform: animated ? 'translateY(0)' : 'translateY(12px)',
-          transition: 'opacity 0.4s ease, transform 0.4s ease'
-        }}>
-          <div>
-            <div className="score-label">Recruiter Readability Score</div>
-            <div className="score-value" style={{ color }}>{score}</div>
-            <div className="score-percent-badge" style={{ marginTop: '6px' }}>
-              {displayPercent}%
-            </div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div className="score-icon">{icon}</div>
-            <div style={{
-              marginTop: '8px',
-              fontSize: '11px',
-              fontWeight: '600',
-              color: color,
-              letterSpacing: '0.05em'
-            }}>
-              {score === 'Recruiter Ready' && 'Interview Ready'}
-              {score === 'Strong' && 'Nearly There'}
-              {score === 'Decent Foundation' && 'Needs Polish'}
-              {score === 'Needs Work' && 'Needs Rebuild'}
-            </div>
+    return (
+      <div className={`score-banner ${classMap[score] || 'needs-work'}`} style={{
+        opacity: animated ? 1 : 0,
+        transform: animated ? 'translateY(0)' : 'translateY(12px)',
+        transition: 'opacity 0.4s ease, transform 0.4s ease'
+      }}>
+        <div>
+          <div className="score-label">Recruiter Readability Score</div>
+          <div className="score-value" style={{ color }}>{score}</div>
+          <div className="score-percent-badge">{displayPercent}%</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div className="score-icon">{icon}</div>
+          <div style={{ marginTop: '8px', fontSize: '11px', fontWeight: '600', color, letterSpacing: '0.05em' }}>
+            {score === 'Recruiter Ready' && 'Interview Ready'}
+            {score === 'Strong' && 'Nearly There'}
+            {score === 'Decent Foundation' && 'Needs Polish'}
+            {score === 'Needs Work' && 'Needs Rebuild'}
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    // Expose render function to vanilla JS
-    window.renderScoreBanner = function(score, percent, icon) {
-      const root = document.getElementById('scoreBannerRoot');
-      if (!root) return;
-      ReactDOM.render(
-        <ScoreBanner score={score} percent={percent} icon={icon} />,
-        root
-      );
-    };
-
-    window.clearScoreBanner = function() {
-      const root = document.getElementById('scoreBannerRoot');
-      if (root) ReactDOM.unmountComponentAtNode(root);
-    };
-  </script>
+  window.renderScoreBanner = function(score, percent, icon) {
+    const root = document.getElementById('scoreBannerRoot');
+    if (!root) return;
+    ReactDOM.render(<ScoreBanner score={score} percent={percent} icon={icon} />, root);
+  };
+  window.clearScoreBanner = function() {
+    const root = document.getElementById('scoreBannerRoot');
+    if (root) ReactDOM.unmountComponentAtNode(root);
+  };
+</script>
 
 </body>
 </html>
