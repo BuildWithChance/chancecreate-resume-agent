@@ -1241,6 +1241,13 @@
 
   // EMAIL GATE
   function showEmailGate(data) {
+    // Returning user — already have their email, skip gate entirely
+    if (currentUserEmail) {
+      renderResults(data);
+      saveAuditToSupabase(currentUserEmail, data);
+      loadHistory(currentUserEmail);
+      return;
+    }
     pendingResults = data;
     document.getElementById('emailGate').classList.add('active');
     setTimeout(function() {
