@@ -591,6 +591,80 @@
     display: inline-block;
   }
 
+  /* NEW AUDIT BAR — shown at top of form when user has a session */
+  .new-audit-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--surface2) 0%, #ede4f5 100%);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    flex-wrap: wrap;
+  }
+  .new-audit-bar.active { display: flex; }
+  .new-audit-bar-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .new-audit-bar-text strong { color: var(--accent-deep); }
+  .new-audit-bar-text span { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
+  .btn-new-audit {
+    background: var(--accent-deep);
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-new-audit:hover { background: #8559a8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(155,109,187,0.25); }
+
+  /* RESULTS FOOTER — new audit + sign out at bottom of results */
+  .results-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 4px;
+  }
+  .btn-new-audit-lg {
+    background: var(--accent-deep);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    min-width: 200px;
+  }
+  .btn-new-audit-lg:hover { background: #8559a8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(155,109,187,0.3); }
+  .btn-sign-out {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-sign-out:hover { border-color: var(--danger); color: var(--danger); }
+
   /* GUEST SAVE PROMPT */
   .guest-save-prompt {
     display: none;
@@ -872,6 +946,15 @@
     </div>
   </div>
 
+  <!-- New Audit Bar — visible when user has active session -->
+  <div class="new-audit-bar" id="newAuditBar">
+    <div class="new-audit-bar-text">
+      <strong>&#10003; Your last audit is saved.</strong>
+      <span>Ready to audit a new resume? Your history is tracked above.</span>
+    </div>
+    <button class="btn-new-audit" onclick="startNewAudit()">&#43; New Audit</button>
+  </div>
+
   <div class="upload-zone" id="dropZone">
     <input type="file" id="fileInput" accept=".pdf,.txt">
     <div class="upload-icon">&#128196;</div>
@@ -977,7 +1060,11 @@
       <button class="guest-save-prompt-dismiss" onclick="dismissSavePrompt()">No thanks, I'll skip saving</button>
     </div>
 
-    <button class="btn-reset" onclick="resetForm()">&larr; Start Over</button>
+    <!-- Results footer -->
+    <div class="results-footer" id="resultsFooter">
+      <button class="btn-new-audit-lg" onclick="startNewAudit()">&#43; Audit Another Resume</button>
+      <button class="btn-sign-out" onclick="signOut()" id="signOutBtn" style="display:none;">Sign Out</button>
+    </div>
   </div>
 
   <!-- Sign In Gate -->
@@ -1218,11 +1305,9 @@
 
   // ── EMAIL GATE ──
   function showEmailGate(data) {
-    // Returning user — skip gate
+    // Returning user — skip gate, renderResults handles save + history reload
     if (currentUserEmail) {
       renderResults(data);
-      saveAuditToSupabase(currentUserEmail, data);
-      loadHistory(currentUserEmail);
       return;
     }
     pendingResults = data;
@@ -1340,7 +1425,17 @@
       document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
-    if (currentUserEmail) saveAuditToSupabase(currentUserEmail, data);
+    if (currentUserEmail) {
+      // Show new audit bar and sign out immediately
+      var bar = document.getElementById('newAuditBar');
+      if (bar) bar.classList.add('active');
+      var signOutBtn = document.getElementById('signOutBtn');
+      if (signOutBtn) signOutBtn.style.display = '';
+      // Save then reload history so new entry appears in real time
+      saveAuditToSupabase(currentUserEmail, data).then(function() {
+        loadHistory(currentUserEmail);
+      });
+    }
   }
 
   // ── COPY / DOWNLOAD ──
@@ -1456,7 +1551,8 @@
   }
 
   // ── RESET ──
-  function resetForm() {
+  // ── START NEW AUDIT (keeps session + history) ──
+  function startNewAudit() {
     uploadedText = '';
     pendingResults = null;
     fileInput.value = '';
@@ -1469,8 +1565,35 @@
     document.getElementById('errorBox').classList.remove('active');
     if (window.clearScoreBanner) window.clearScoreBanner();
     dismissSavePrompt();
+    // Scroll to upload zone so they can drop a new resume
+    setTimeout(function() {
+      document.getElementById('dropZone').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
+  // ── SIGN OUT (clears session, hides history) ──
+  function signOut() {
+    currentUserEmail = null;
+    uploadedText = '';
+    pendingResults = null;
+    fileInput.value = '';
+    document.getElementById('resumeText').value = '';
+    document.getElementById('targetRole').value = '';
+    document.getElementById('industry').value = '';
+    document.getElementById('focusNote').value = '';
+    document.getElementById('fileStatus').className = 'file-status';
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('errorBox').classList.remove('active');
+    document.getElementById('historyPanel').classList.remove('active');
+    document.getElementById('newAuditBar').classList.remove('active');
+    document.getElementById('signOutBtn').style.display = 'none';
+    if (window.clearScoreBanner) window.clearScoreBanner();
+    dismissSavePrompt();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  // ── LEGACY resetForm — kept for safety ──
+  function resetForm() { startNewAudit(); }
 
   // ── SCORING ──
   var scoreRanges = {
@@ -1496,11 +1619,12 @@
       var targetRole = document.getElementById('targetRole')
         ? document.getElementById('targetRole').value.trim() : '';
       var enriched = Object.assign({}, auditData, { targetRole: targetRole || null });
-      await fetch('/.netlify/functions/saveAudit', {
+      var res = await fetch('/.netlify/functions/saveAudit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, auditData: enriched })
       });
+      return await res.json();
     } catch (err) {
       console.warn('Save audit error:', err.message);
     }
@@ -1610,6 +1734,14 @@
     });
 
     panel.classList.add('active');
+
+    // Show new audit bar and sign out if results are already visible
+    var newAuditBar = document.getElementById('newAuditBar');
+    if (newAuditBar) newAuditBar.classList.add('active');
+
+    // Show sign out button in results footer
+    var signOutBtn = document.getElementById('signOutBtn');
+    if (signOutBtn) signOutBtn.style.display = '';
   }
 
   function toggleHistoryCard(cardId) {
