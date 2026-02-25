@@ -1382,10 +1382,10 @@
     document.getElementById('emailGate').classList.remove('active');
     currentUserEmail = capturedEmail;
     if (pendingResults) {
-      renderResults(pendingResults);
+      var results = pendingResults;
       pendingResults = null;
+      renderResults(results); // renderResults handles save + loadHistory internally
     }
-    if (capturedEmail) loadHistory(capturedEmail);
     setTimeout(function() {
       var r = document.getElementById('results');
       if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' });
