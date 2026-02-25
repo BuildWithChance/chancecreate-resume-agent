@@ -1305,11 +1305,9 @@
 
   // ── EMAIL GATE ──
   function showEmailGate(data) {
-    // Returning user — skip gate
+    // Returning user — skip gate, renderResults handles save + history reload
     if (currentUserEmail) {
       renderResults(data);
-      saveAuditToSupabase(currentUserEmail, data);
-      loadHistory(currentUserEmail);
       return;
     }
     pendingResults = data;
@@ -1428,12 +1426,15 @@
     }, 100);
 
     if (currentUserEmail) {
-      saveAuditToSupabase(currentUserEmail, data);
-      // Show new audit bar and sign out button now that they have results
+      // Show new audit bar and sign out immediately
       var bar = document.getElementById('newAuditBar');
       if (bar) bar.classList.add('active');
       var signOutBtn = document.getElementById('signOutBtn');
       if (signOutBtn) signOutBtn.style.display = '';
+      // Save then reload history so new entry appears in real time
+      saveAuditToSupabase(currentUserEmail, data).then(function() {
+        loadHistory(currentUserEmail);
+      });
     }
   }
 
@@ -1618,11 +1619,12 @@
       var targetRole = document.getElementById('targetRole')
         ? document.getElementById('targetRole').value.trim() : '';
       var enriched = Object.assign({}, auditData, { targetRole: targetRole || null });
-      await fetch('/.netlify/functions/saveAudit', {
+      var res = await fetch('/.netlify/functions/saveAudit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, auditData: enriched })
       });
+      return await res.json();
     } catch (err) {
       console.warn('Save audit error:', err.message);
     }
