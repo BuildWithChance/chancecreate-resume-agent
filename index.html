@@ -386,9 +386,10 @@
     background: rgba(36,36,36,0.6);
     backdrop-filter: blur(4px);
     z-index: 100;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     padding: 24px;
+    overflow-y: auto;
   }
   .email-gate.active { display: flex; }
   .email-gate-box {
@@ -400,6 +401,7 @@
     text-align: center;
     box-shadow: 0 24px 60px rgba(36,36,36,0.18);
     animation: popIn 0.25s ease;
+    margin: auto;
   }
   @keyframes popIn {
     from { transform: scale(0.94); opacity: 0; }
@@ -1295,8 +1297,8 @@
     var firstName = nameVal ? nameVal.split(' ')[0] : 'friend';
     document.getElementById('successFirstName').textContent = firstName;
 
-    // Hide all gate children except success screen
-    var gateBox = document.querySelector('.email-gate-box');
+    // Target the correct gate box (email gate, not signin gate)
+    var gateBox = document.querySelector('#emailGate .email-gate-box');
     Array.from(gateBox.children).forEach(function(el) {
       if (el.id !== 'gateSuccess') el.style.display = 'none';
     });
@@ -1304,12 +1306,17 @@
 
     // Store email for when user clicks close
     window._pendingGateEmail = document.getElementById('gateEmail').value.trim();
+
+    // Reset unlock button for future use
+    var btn = document.getElementById('unlockBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Unlock My Resume Audit →'; }
   }
 
   function closeSuccessAndShowResults() {
     var capturedEmail = window._pendingGateEmail || '';
-    // Reset gate for future use
-    Array.from(document.querySelector('.email-gate-box').children).forEach(function(el) {
+    // Reset gate children for future use
+    var gateBox = document.querySelector('#emailGate .email-gate-box');
+    Array.from(gateBox.children).forEach(function(el) {
       el.style.display = '';
     });
     document.getElementById('gateSuccess').classList.remove('active');
@@ -1320,6 +1327,11 @@
       pendingResults = null;
     }
     if (capturedEmail) loadHistory(capturedEmail);
+    // Scroll to results smoothly
+    setTimeout(function() {
+      var results = document.getElementById('results');
+      if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
   }
 
   function renderResults(data) {
