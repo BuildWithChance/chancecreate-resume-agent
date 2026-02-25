@@ -1,57 +1,67 @@
 const https = require("https");
 
-exports.handler = async function (event) {
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
+// Helper to make requests to Supabase
+function supabaseRequest(path, method, body) {
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+  const hostname = SUPABASE_URL.replace("https://", "");
+
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const req = https.request(
+      {
+        hostname,
+        path,
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Prefer": "return=representation",
+          "Content-Length": Buffer.byteLength(payload),
+        },
       },
-      body: "",
-    };
-  }
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => resolve({ status: res.statusCode, body: data }));
+      }
+    );
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+}
 
+exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ error: "Method Not Allowed" }),
-    };
-  }
-
-  const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
-  const GROUP_ID = "180310043648853210";
-
-  if (!MAILERLITE_API_KEY) {
-    return {
-      statusCode: 500,
-      headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ error: "MailerLite API key not configured" }),
-    };
+    return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
   }
 
   try {
-    const body = JSON.parse(event.body);
-    const { email, name } = body;
+    const { email, name } = JSON.parse(event.body);
+    if (!email) return { statusCode: 400, body: JSON.stringify({ error: "Email required" }) };
 
-    if (!email || !email.includes("@")) {
-      return {
-        statusCode: 400,
-        headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({ error: "Valid email required" }),
-      };
-    }
+    // 1. Save to Supabase users table (upsert so returning users don't error)
+    const supabaseRes = await supabaseRequest(
+      "/rest/v1/users",
+      "POST",
+      { email, name: name || null }
+    );
 
-    const payload = JSON.stringify({
-      email: email.trim().toLowerCase(),
+    // 409 means user already exists — that's fine
+    const supabaseSuccess = supabaseRes.status === 201 || supabaseRes.status === 409;
+
+    // 2. Save to MailerLite
+    const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
+    const mailPayload = JSON.stringify({
+      email,
       fields: { name: name || "" },
-      groups: [GROUP_ID],
+      groups: ["180310043648853210"],
       status: "active",
     });
 
-    const result = await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const req = https.request(
         {
           hostname: "connect.mailerlite.com",
@@ -59,38 +69,26 @@ exports.handler = async function (event) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + MAILERLITE_API_KEY,
-            "Content-Length": Buffer.byteLength(payload),
+            "Authorization": `Bearer ${MAILERLITE_API_KEY}`,
+            "Content-Length": Buffer.byteLength(mailPayload),
           },
         },
         (res) => {
           let data = "";
           res.on("data", (chunk) => (data += chunk));
-          res.on("end", () => resolve({ status: res.statusCode, body: data }));
+          res.on("end", () => resolve(data));
         }
       );
       req.on("error", reject);
-      req.write(payload);
+      req.write(mailPayload);
       req.end();
     });
 
-    // 200 or 201 = success, 409 = already subscribed (also fine)
-    if (result.status === 200 || result.status === 201 || result.status === 409) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({ success: true }),
-      };
-    } else {
-      return {
-        statusCode: 400,
-        headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({ error: "Subscription failed", detail: result.body }),
-      };
-    }
+    return {
+      statusCode: 200,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ success: true }),
+    };
   } catch (err) {
     return {
       statusCode: 500,
