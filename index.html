@@ -571,6 +571,149 @@
     display: inline-block;
   }
 
+  /* EMAIL GATE SUCCESS SCREEN */
+  .email-gate-success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0;
+    gap: 12px;
+  }
+  .email-gate-success.active { display: flex; }
+  .email-gate-success-icon {
+    font-size: 48px;
+    animation: bounceIn 0.5s ease;
+  }
+  @keyframes bounceIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .email-gate-success h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--text);
+    margin: 0;
+  }
+  .email-gate-success h3 em {
+    color: var(--accent-deep);
+    font-style: normal;
+  }
+  .email-gate-success-msg {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 320px;
+  }
+  .email-gate-success-steps {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .email-gate-success-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .email-gate-success-step-num {
+    background: var(--accent-deep);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .email-gate-success-cta {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* EMAIL GATE SUCCESS */
+  .gate-success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 8px 0;
+  }
+  .gate-success.active { display: flex; }
+  .gate-success-icon {
+    font-size: 44px;
+    animation: popIn 0.4s ease;
+  }
+  @keyframes popIn {
+    0%   { transform: scale(0.4); opacity: 0; }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .gate-success h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.4rem;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.3;
+  }
+  .gate-success h3 em { color: var(--accent-deep); font-style: normal; }
+  .gate-success-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+  }
+  .gate-success-steps {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 16px 18px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+  }
+  .gate-success-step {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .gate-step-num {
+    background: var(--accent-deep);
+    color: #fff;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .gate-success-footer {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0;
+  }
+
   /* GUEST SAVE PROMPT */
   .guest-save-prompt {
     display: none;
@@ -802,6 +945,32 @@
       <div class="email-gate-error" id="gateError"></div>
       <button class="email-gate-skip" onclick="skipEmailGate()">No thanks, just show me the results</button>
       <p class="email-gate-privacy">No spam. Unsubscribe anytime. Your info stays with Chance Create&trade;.</p>
+
+      <!-- Success state - shown after email submitted -->
+      <div class="gate-success" id="gateSuccess">
+        <div class="gate-success-icon">&#127881;</div>
+        <h3>You&#8217;re in, <em id="successFirstName">friend</em>!</h3>
+        <p class="gate-success-sub">Check your inbox &#8212; your Career Reinvention Roadmap is on its way.</p>
+        <div class="gate-success-steps">
+          <div class="gate-success-step">
+            <div class="gate-step-num">1</div>
+            <div><strong>Check your email</strong> &#8212; your free Career Reinvention Roadmap has recruiter insider tips you can use today.</div>
+          </div>
+          <div class="gate-success-step">
+            <div class="gate-step-num">2</div>
+            <div><strong>Start with critical issues</strong> &#8212; those are what&#8217;s costing you interviews right now.</div>
+          </div>
+          <div class="gate-success-step">
+            <div class="gate-step-num">3</div>
+            <div><strong>Download your rewritten resume</strong> &#8212; it&#8217;s ATS-ready and built to pass the 10-second scan.</div>
+          </div>
+          <div class="gate-success-step">
+            <div class="gate-step-num">4</div>
+            <div><strong>Come back anytime</strong> &#8212; sign in with this email to track your score over time.</div>
+          </div>
+        </div>
+        <p class="gate-success-footer">Your full report is loading below &#8595; Taking you there in a moment&#8230;</p>
+      </div>
     </div>
   </div>
 
@@ -1052,11 +1221,34 @@
       // Still show results even if subscribe fails
     }
 
-    document.getElementById('emailGate').classList.remove('active');
-    if (pendingResults) {
-      renderResults(pendingResults);
-      pendingResults = null;
-    }
+    // Show success screen
+    var nameVal = document.getElementById('gateName').value.trim();
+    var firstName = nameVal ? nameVal.split(' ')[0] : 'friend';
+    document.getElementById('successFirstName').textContent = firstName;
+
+    // Hide all gate children except success screen
+    var gateBox = document.querySelector('.email-gate-box');
+    Array.from(gateBox.children).forEach(function(el) {
+      if (el.id !== 'gateSuccess') el.style.display = 'none';
+    });
+    document.getElementById('gateSuccess').classList.add('active');
+
+    // Auto-close after 3.2 seconds then show results
+    var capturedEmail = document.getElementById('gateEmail').value.trim();
+    setTimeout(function() {
+      // Reset gate for future use
+      Array.from(document.querySelector('.email-gate-box').children).forEach(function(el) {
+        el.style.display = '';
+      });
+      document.getElementById('gateSuccess').classList.remove('active');
+      document.getElementById('emailGate').classList.remove('active');
+      currentUserEmail = capturedEmail;
+      if (pendingResults) {
+        renderResults(pendingResults);
+        pendingResults = null;
+      }
+      loadHistory(capturedEmail);
+    }, 3200);
   }
 
   function renderResults(data) {
