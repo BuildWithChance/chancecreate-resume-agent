@@ -1263,32 +1263,24 @@
         throw new Error('The AI is experiencing high demand right now. Wait 30 seconds and try again.');
       }
 
-      // Handle both direct response and nested body string
-      var responseData = data;
-      if (typeof data.body === 'string') {
-        try { responseData = JSON.parse(data.body); } catch(e) { responseData = data; }
-      }
-
-      var raw = (responseData.content || []).map(function(c) { return c.text || ''; }).join('');
+      // Extract the audit JSON from the Anthropic response envelope
+      // data = { content: [{type:'text', text:'{"score":...}'}], ... }
+      var raw = (data.content || []).map(function(c) { return c.text || ''; }).join('');
       if (!raw) throw new Error('Empty response — please try again.');
 
       // Extract outermost JSON object
       var jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON found in response.');
 
-      // Clean control characters but preserve valid unicode
+      // Only strip true control characters — do NOT touch newlines or content
       var cleaned = jsonMatch[0]
-        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
-        .replace(/\t/g, ' ')
-        .replace(/\r\n/g, '\\n')
-        .replace(/\r/g, '\\n');
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ');
 
       var parsed;
       try {
         parsed = JSON.parse(cleaned);
       } catch(parseErr) {
-        // Fallback: try extracting just through revisedResume if full parse fails
-        console.warn('Full parse failed, trying fallback:', parseErr.message);
+        console.warn('Full parse failed:', parseErr.message);
         throw new Error('Could not read audit response — please try again.');
       }
       showEmailGate(parsed);
