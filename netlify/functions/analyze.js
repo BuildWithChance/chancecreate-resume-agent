@@ -61,7 +61,7 @@ exports.handler = async function (event) {
 
     const payload = JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 6000,
+      max_tokens: 4500,
       system: systemPrompt,
       messages: body.messages,
     });
