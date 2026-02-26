@@ -1006,9 +1006,24 @@
   </button>
 
   <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p><strong>Reading your resume like a recruiter would&hellip;</strong></p>
-    <p style="margin-top:6px;">This takes about 15&ndash;25 seconds. Hang tight.</p>
+      <div class="spinner"></div>
+      <p><strong>Reading your resume like a recruiter would&hellip;</strong></p>
+      <p style="margin-top:6px;">This takes about 15&ndash;25 seconds. Hang tight.</p>
+      <div id="recruitFact" style="
+        margin-top: 20px;
+        font-size: 13px;
+        color: var(--accent-deep);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 18px;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+        transition: opacity 0.5s ease;
+        opacity: 1;
+      "></div>
   </div>
 
   <div class="results" id="results">
@@ -1237,6 +1252,7 @@
     document.getElementById('analyzeBtn').disabled = true;
     document.getElementById('loading').classList.add('active');
     document.getElementById('results').classList.remove('active');
+    startFactRotation();
 
     try {
       var prompt = buildPrompt(resumeContent, targetRole, industry, focusNote);
@@ -1291,6 +1307,7 @@
     } finally {
       document.getElementById('analyzeBtn').disabled = false;
       document.getElementById('loading').classList.remove('active');
+      stopFactRotation();
     }
   }
 
@@ -1796,6 +1813,42 @@
     btn.textContent = box.classList.contains('open') ? '\uD83D\uDCC4 Hide Rewritten Resume' : '\uD83D\uDCC4 View Rewritten Resume';
   }
 
+  // ── ROTATING RECRUITER FACTS ──
+  var recruitFacts = [
+      "75% of resumes are rejected by ATS before a human ever sees them.",
+      "Recruiters spend an average of 7 seconds on an initial resume scan.",
+      "Resumes with measurable results get 40% more callbacks than those without.",
+      "A single typo can get your resume rejected at 58% of companies.",
+      "Most ATS systems can't read tables, text boxes, or multi-column layouts.",
+      "Keywords from the job description matter — ATS scores for exact matches.",
+      "The top third of your resume determines whether the rest gets read.",
+      "Applicants with a LinkedIn URL on their resume get 71% more interview requests."
+   ];
+  var factInterval = null;
+  var factIndex = 0;
+    
+  function startFactRotation() {
+      var el = document.getElementById('recruitFact');
+      if (!el) return;
+      factIndex = Math.floor(Math.random() * recruitFacts.length);
+      el.textContent = recruitFacts[factIndex];
+      el.style.opacity = '1';
+      factInterval = setInterval(function() {
+        el.style.opacity = '0';
+        setTimeout(function() {
+          factIndex = (factIndex + 1) % recruitFacts.length;
+          el.textContent = recruitFacts[factIndex];
+          el.style.opacity = '1';
+        }, 500);
+      }, 3500);
+    }
+    
+  function stopFactRotation() {
+      if (factInterval) { clearInterval(factInterval); factInterval = null; }
+      var el = document.getElementById('recruitFact');
+      if (el) { el.textContent = ''; el.style.opacity = '0'; }
+    }
+  
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
