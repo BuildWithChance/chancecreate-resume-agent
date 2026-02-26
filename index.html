@@ -1314,10 +1314,12 @@
     prompt += '\n2. ROLE TITLE FORMAT\n';
     prompt += '   - ALWAYS use a pipe | between job title and location\n';
     prompt += '   - Example: Customer Success Manager | Tampa, FL\n';
+    prompt += '   - The pipe | separator is REQUIRED between every job title and location. Never put title and location on the same line without it.\n';
     prompt += '\n3. DATES — always use en dash: 2022 – 2024, not 2022 - 2024\n';
     prompt += '\n4. OLDER ROLES — do NOT fabricate bullets for vague older experience\n';
     prompt += '\n5. CHRONOLOGICAL ORDER — in the rewritten resume, ALWAYS sort all roles with the most recent first (reverse chronological). UST Xpanxion 2024 comes before Intuit 2022, which comes before TD Bank 2021, which comes before JPMorgan 2016.\n';
     prompt += '\n6. EDUCATION — if none found, flag as warning\n';
+    prompt += '   - Section order MUST be: SUMMARY, EXPERIENCE, EDUCATION, CERTIFICATIONS, KEY PROJECTS, SKILLS\n';
     prompt += '\n7. EDUCATION — scan the ENTIRE resume text including the bottom for any education section. Do not skip it if it appears after experience or certifications.\n';
     prompt += '\n8. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
     prompt += '\n9. NEW FIELDS — include these in the JSON:\n';
