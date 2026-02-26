@@ -1008,7 +1008,7 @@
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p><strong>Reading your resume like a recruiter would&hellip;</strong></p>
-    <p style="margin-top:6px;">This takes about 20&ndash;30 seconds.</p>
+    <p style="margin-top:6px;">This takes about 15&ndash;25 seconds. Hang tight.</p>
   </div>
 
   <div class="results" id="results">
@@ -1246,7 +1246,18 @@
         body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
       });
 
-      var data = await response.json();
+      // Check for non-JSON responses before attempting parse
+      var responseText = await response.text();
+      if (!response.ok || responseText.trim().startsWith('<')) {
+        if (response.status === 504) throw new Error('The audit timed out — please try again in a moment.');
+        if (response.status === 502) throw new Error('Server error — please try again in a moment.');
+        throw new Error('Something went wrong (status ' + response.status + '). Please try again.');
+      }
+
+      var data;
+      try { data = JSON.parse(responseText); }
+      catch(e) { throw new Error('Could not read server response. Please try again.'); }
+
       if (data.error) throw new Error(typeof data.error === 'object' ? JSON.stringify(data.error) : data.error);
       if (data.type === 'overloaded_error' || (data.error && data.error.type === 'overloaded_error')) {
         throw new Error('The AI is experiencing high demand right now. Wait 30 seconds and try again.');
