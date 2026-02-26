@@ -1263,32 +1263,24 @@
         throw new Error('The AI is experiencing high demand right now. Wait 30 seconds and try again.');
       }
 
-      // Handle both direct response and nested body string
-      var responseData = data;
-      if (typeof data.body === 'string') {
-        try { responseData = JSON.parse(data.body); } catch(e) { responseData = data; }
-      }
-
-      var raw = (responseData.content || []).map(function(c) { return c.text || ''; }).join('');
+      // Extract the audit JSON from the Anthropic response envelope
+      // data = { content: [{type:'text', text:'{"score":...}'}], ... }
+      var raw = (data.content || []).map(function(c) { return c.text || ''; }).join('');
       if (!raw) throw new Error('Empty response — please try again.');
 
       // Extract outermost JSON object
       var jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON found in response.');
 
-      // Clean control characters but preserve valid unicode
+      // Only strip true control characters — do NOT touch newlines or content
       var cleaned = jsonMatch[0]
-        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
-        .replace(/\t/g, ' ')
-        .replace(/\r\n/g, '\\n')
-        .replace(/\r/g, '\\n');
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ');
 
       var parsed;
       try {
         parsed = JSON.parse(cleaned);
       } catch(parseErr) {
-        // Fallback: try extracting just through revisedResume if full parse fails
-        console.warn('Full parse failed, trying fallback:', parseErr.message);
+        console.warn('Full parse failed:', parseErr.message);
         throw new Error('Could not read audit response — please try again.');
       }
       showEmailGate(parsed);
@@ -1304,7 +1296,7 @@
 
   // ── PROMPT BUILDER ──
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    var text = resumeText.slice(0, 3000);
+    var text = resumeText.slice(0, 4000);
     var prompt = 'Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\n';
     prompt += 'RESUME:\n' + text + '\n\n';
     prompt += 'TARGET ROLE: ' + (targetRole || 'Not specified') + '\n';
@@ -1322,16 +1314,21 @@
     prompt += '\n2. ROLE TITLE FORMAT\n';
     prompt += '   - ALWAYS use a pipe | between job title and location\n';
     prompt += '   - Example: Customer Success Manager | Tampa, FL\n';
+    prompt += '   - The pipe | separator is REQUIRED between every job title and location. Never put title and location on the same line without it.\n';
     prompt += '\n3. DATES — always use en dash: 2022 – 2024, not 2022 - 2024\n';
     prompt += '\n4. OLDER ROLES — do NOT fabricate bullets for vague older experience\n';
-    prompt += '\n5. EDUCATION — if none found, flag as warning\n';
-    prompt += '\n6. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
-    prompt += '\n7. NEW FIELDS — include these in the JSON:\n';
+    prompt += '\n5. CHRONOLOGICAL ORDER — in the rewritten resume, ALWAYS sort all roles with the most recent first (reverse chronological). UST Xpanxion 2024 comes before Intuit 2022, which comes before TD Bank 2021, which comes before JPMorgan 2016.\n';
+    prompt += '\n6. EDUCATION — if none found, flag as warning\n';
+    prompt += '   - Section order MUST be: SUMMARY, EXPERIENCE, EDUCATION, CERTIFICATIONS, KEY PROJECTS, SKILLS\n';
+    prompt += '\n7. EDUCATION — scan the ENTIRE resume text including the bottom for any education section. Do not skip it if it appears after experience or certifications.\n';
+    prompt += '\n8. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
+    prompt += '\n9. NEW FIELDS — include these in the JSON:\n';
     prompt += 'headlineInsight: 2 sentences to this person (not about the resume). Gap between their background and what the resume shows, then what fixing it unlocks. Warm insider tone.\n';
     prompt += 'humanSignal: 3 sentences. Recruiter narrative inference, what is accidentally communicated, what positioning is missing. Specific to this resume.\n';
     prompt += 'machineRead: Array of ATS flags. Each: {flag, risk: high/medium/low, fix}. 2-5 flags.\n';
     prompt += 'realityCheck: {inYourControl: act on now, marketContext: honest market framing, beyondTheResume: what else matters}. 1-2 sentences each.\n';
-    prompt += '\nReturn ONLY valid JSON with these fields: score, issues, tenSecondTest, atsNotes, revisedResume, headlineInsight, humanSignal, machineRead, realityCheck\n';
+    prompt += '\nReturn ONLY valid JSON. The issues field MUST be an array of objects with exactly 2 keys each: "type" (must be exactly "critical", "warning", or "tip") and "text" (the issue description). Example: [{"type":"critical","text":"Missing contact info"},{"type":"warning","text":"Weak summary"}]\n';
+    prompt += 'Other required fields: score, tenSecondTest, atsNotes, revisedResume, headlineInsight, humanSignal, machineRead, realityCheck\n';
     return prompt;
   }
 
@@ -1443,8 +1440,19 @@
     issueList.innerHTML = '';
     (data.issues || []).forEach(function(issue) {
       var li = document.createElement('li');
-      li.className = 'issue-item ' + (issue.type || 'tip');
-      li.innerHTML = '<span class="issue-tag">' + (issue.type || 'tip') + '</span><span>' + issue.text + '</span>';
+      // Handle both {type, text} objects and plain strings
+      var issueType, issueText;
+      if (typeof issue === 'string') {
+        issueText = issue;
+        var lower = issue.toLowerCase();
+        issueType = lower.includes('missing') || lower.includes('no ') || lower.includes('gap') || lower.includes('unclear') ? 'critical' :
+                    lower.includes('consider') || lower.includes('suggest') || lower.includes('could') ? 'tip' : 'warning';
+      } else {
+        issueType = issue.type || 'tip';
+        issueText = issue.text || '';
+      }
+      li.className = 'issue-item ' + issueType;
+      li.innerHTML = '<span class="issue-tag">' + issueType + '</span><span>' + issueText + '</span>';
       issueList.appendChild(li);
     });
 
