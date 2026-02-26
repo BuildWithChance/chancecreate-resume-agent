@@ -1298,8 +1298,24 @@
     prompt += '\n4. OLDER ROLES — do NOT fabricate bullets for vague older experience\n';
     prompt += '\n5. EDUCATION — if none found, flag as warning\n';
     prompt += '\n6. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
-    prompt += '\nReturn ONLY this JSON:\n';
-    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt recruiter take","atsNotes":"ATS risks","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n...\\n\\nEXPERIENCE\\n...\\n\\nEDUCATION\\n...\\n\\nSKILLS\\n..."}';
+    prompt += '\n7. NEW FIELDS — required, follow instructions carefully:\n';
+    prompt += '\n   headlineInsight: Exactly 2 sentences. Written directly to this specific person based on what their resume actually shows. ';
+    prompt += 'Sentence 1: Name the core tension or gap you see — what their background suggests vs what the resume communicates. ';
+    prompt += 'Sentence 2: One honest, forward-looking statement about what fixing this unlocks. ';
+    prompt += 'Tone: warm, direct, like a trusted insider who genuinely wants them to win. NEVER generic. NEVER "your resume shows..." — speak to the person, not the document.\n';
+    prompt += '\n   humanSignal: 3-4 sentences on what story this resume tells a human recruiter in 10 seconds. ';
+    prompt += 'Cover: (1) what narrative the recruiter infers about this person, (2) what is accidentally being communicated that the person probably did not intend, (3) what is missing from the positioning that would make a recruiter lean in. ';
+    prompt += 'Be specific to this actual resume — no generic observations. Tone: honest, not harsh.\n';
+    prompt += '\n   machineRead: An array of ATS structural flags found in this resume. ';
+    prompt += 'Each flag is an object with 3 fields: "flag" (what was detected in plain language), "risk" (exactly one of: "high", "medium", "low"), "fix" (one sentence, specific and actionable). ';
+    prompt += 'Look for: multi-column layout, tables, text boxes, graphics, contact info in headers/footers, non-standard section names, inconsistent date formats, special characters in bullets, fonts that may not parse, missing standard sections. ';
+    prompt += 'Return between 2 and 6 flags. If the resume is structurally clean return 1 flag confirming it with risk "low".\n';
+    prompt += '\n   realityCheck: An object with exactly 3 fields: ';
+    prompt += '"inYourControl" (2-3 sentences — what this person can act on right now based on their specific audit results), ';
+    prompt += '"marketContext" (1-2 sentences — honest current market framing relevant to their target role or industry, not generic advice), ';
+    prompt += '"beyondTheResume" (1-2 sentences — what else matters in their search beyond the resume, specific to their situation).\n';
+    prompt += '\nReturn ONLY this JSON structure:\n';
+    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt recruiter take","atsNotes":"ATS risks","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n...\\n\\nEXPERIENCE\\n...\\n\\nEDUCATION\\n...\\n\\nSKILLS\\n...","headlineInsight":"2 sentences written directly to this person.","humanSignal":"3-4 sentences on what recruiters actually see.","machineRead":[{"flag":"what was detected","risk":"high","fix":"specific one-line fix"}],"realityCheck":{"inYourControl":"2-3 sentences on what to act on now.","marketContext":"1-2 sentences of honest market framing.","beyondTheResume":"1-2 sentences on what else matters."}}';
     return prompt;
   }
 
