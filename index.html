@@ -1296,7 +1296,7 @@
 
   // ── PROMPT BUILDER ──
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    var text = resumeText.slice(0, 3000);
+    var text = resumeText.slice(0, 4000);
     var prompt = 'Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\n';
     prompt += 'RESUME:\n' + text + '\n\n';
     prompt += 'TARGET ROLE: ' + (targetRole || 'Not specified') + '\n';
@@ -1316,9 +1316,11 @@
     prompt += '   - Example: Customer Success Manager | Tampa, FL\n';
     prompt += '\n3. DATES — always use en dash: 2022 – 2024, not 2022 - 2024\n';
     prompt += '\n4. OLDER ROLES — do NOT fabricate bullets for vague older experience\n';
-    prompt += '\n5. EDUCATION — if none found, flag as warning\n';
-    prompt += '\n6. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
-    prompt += '\n7. NEW FIELDS — include these in the JSON:\n';
+    prompt += '\n5. CHRONOLOGICAL ORDER — in the rewritten resume, ALWAYS sort all roles with the most recent first (reverse chronological). UST Xpanxion 2024 comes before Intuit 2022, which comes before TD Bank 2021, which comes before JPMorgan 2016.\n';
+    prompt += '\n6. EDUCATION — if none found, flag as warning\n';
+    prompt += '\n7. EDUCATION — scan the ENTIRE resume text including the bottom for any education section. Do not skip it if it appears after experience or certifications.\n';
+    prompt += '\n8. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
+    prompt += '\n9. NEW FIELDS — include these in the JSON:\n';
     prompt += 'headlineInsight: 2 sentences to this person (not about the resume). Gap between their background and what the resume shows, then what fixing it unlocks. Warm insider tone.\n';
     prompt += 'humanSignal: 3 sentences. Recruiter narrative inference, what is accidentally communicated, what positioning is missing. Specific to this resume.\n';
     prompt += 'machineRead: Array of ATS flags. Each: {flag, risk: high/medium/low, fix}. 2-5 flags.\n';
