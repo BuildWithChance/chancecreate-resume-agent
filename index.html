@@ -1283,10 +1283,6 @@
         console.warn('Full parse failed:', parseErr.message);
         throw new Error('Could not read audit response — please try again.');
       }
-      // DEBUG — remove after confirming structure
-      console.log('parsed keys:', Object.keys(parsed));
-      console.log('issues[0]:', JSON.stringify(parsed.issues && parsed.issues[0]));
-      console.log('full parsed:', JSON.stringify(parsed).slice(0, 500));
       showEmailGate(parsed);
 
     } catch (err) {
@@ -1327,7 +1323,8 @@
     prompt += 'humanSignal: 3 sentences. Recruiter narrative inference, what is accidentally communicated, what positioning is missing. Specific to this resume.\n';
     prompt += 'machineRead: Array of ATS flags. Each: {flag, risk: high/medium/low, fix}. 2-5 flags.\n';
     prompt += 'realityCheck: {inYourControl: act on now, marketContext: honest market framing, beyondTheResume: what else matters}. 1-2 sentences each.\n';
-    prompt += '\nReturn ONLY valid JSON with these fields: score, issues, tenSecondTest, atsNotes, revisedResume, headlineInsight, humanSignal, machineRead, realityCheck\n';
+    prompt += '\nReturn ONLY valid JSON. The issues field MUST be an array of objects with exactly 2 keys each: "type" (must be exactly "critical", "warning", or "tip") and "text" (the issue description). Example: [{"type":"critical","text":"Missing contact info"},{"type":"warning","text":"Weak summary"}]\n';
+    prompt += 'Other required fields: score, tenSecondTest, atsNotes, revisedResume, headlineInsight, humanSignal, machineRead, realityCheck\n';
     return prompt;
   }
 
@@ -1439,8 +1436,19 @@
     issueList.innerHTML = '';
     (data.issues || []).forEach(function(issue) {
       var li = document.createElement('li');
-      li.className = 'issue-item ' + (issue.type || 'tip');
-      li.innerHTML = '<span class="issue-tag">' + (issue.type || 'tip') + '</span><span>' + issue.text + '</span>';
+      // Handle both {type, text} objects and plain strings
+      var issueType, issueText;
+      if (typeof issue === 'string') {
+        issueText = issue;
+        var lower = issue.toLowerCase();
+        issueType = lower.includes('missing') || lower.includes('no ') || lower.includes('gap') || lower.includes('unclear') ? 'critical' :
+                    lower.includes('consider') || lower.includes('suggest') || lower.includes('could') ? 'tip' : 'warning';
+      } else {
+        issueType = issue.type || 'tip';
+        issueText = issue.text || '';
+      }
+      li.className = 'issue-item ' + issueType;
+      li.innerHTML = '<span class="issue-tag">' + issueType + '</span><span>' + issueText + '</span>';
       issueList.appendChild(li);
     });
 
