@@ -1283,6 +1283,10 @@
         console.warn('Full parse failed:', parseErr.message);
         throw new Error('Could not read audit response — please try again.');
       }
+      // DEBUG — remove after confirming structure
+      console.log('parsed keys:', Object.keys(parsed));
+      console.log('issues[0]:', JSON.stringify(parsed.issues && parsed.issues[0]));
+      console.log('full parsed:', JSON.stringify(parsed).slice(0, 500));
       showEmailGate(parsed);
 
     } catch (err) {
