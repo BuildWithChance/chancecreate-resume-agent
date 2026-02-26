@@ -1008,7 +1008,7 @@
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p><strong>Reading your resume like a recruiter would&hellip;</strong></p>
-    <p style="margin-top:6px;">This takes about 20&ndash;30 seconds.</p>
+    <p style="margin-top:6px;">This takes about 15&ndash;25 seconds. Hang tight.</p>
   </div>
 
   <div class="results" id="results">
@@ -1146,7 +1146,7 @@
   // ── CONFIG ──
   (async function loadConfig() {
     try {
-      var res = await fetch('/.netlify/functions/getConfig');
+      var res = await fetch('/api/getConfig');
       var text = await res.text();
       if (!text || text.trim().startsWith('<')) return;
       var config = JSON.parse(text);
@@ -1240,29 +1240,57 @@
 
     try {
       var prompt = buildPrompt(resumeContent, targetRole, industry, focusNote);
-      var response = await fetch('/.netlify/functions/analyze', {
+      var response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
       });
 
-      var data = await response.json();
+      // Check for non-JSON responses before attempting parse
+      var responseText = await response.text();
+      if (!response.ok || responseText.trim().startsWith('<')) {
+        if (response.status === 504) throw new Error('The audit timed out — please try again in a moment.');
+        if (response.status === 502) throw new Error('Server error — please try again in a moment.');
+        throw new Error('Something went wrong (status ' + response.status + '). Please try again.');
+      }
+
+      var data;
+      try { data = JSON.parse(responseText); }
+      catch(e) { throw new Error('Could not read server response. Please try again.'); }
+
       if (data.error) throw new Error(typeof data.error === 'object' ? JSON.stringify(data.error) : data.error);
       if (data.type === 'overloaded_error' || (data.error && data.error.type === 'overloaded_error')) {
         throw new Error('The AI is experiencing high demand right now. Wait 30 seconds and try again.');
       }
 
-      var raw = (data.content || []).map(function(c) { return c.text || ''; }).join('');
+      // Handle both direct response and nested body string
+      var responseData = data;
+      if (typeof data.body === 'string') {
+        try { responseData = JSON.parse(data.body); } catch(e) { responseData = data; }
+      }
+
+      var raw = (responseData.content || []).map(function(c) { return c.text || ''; }).join('');
       if (!raw) throw new Error('Empty response — please try again.');
 
+      // Extract outermost JSON object
       var jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON found in response.');
 
+      // Clean control characters but preserve valid unicode
       var cleaned = jsonMatch[0]
-        .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ')
-        .replace(/\t/g, ' ');
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
+        .replace(/\t/g, ' ')
+        .replace(/\r\n/g, '\\n')
+        .replace(/\r/g, '\\n');
 
-      var parsed = JSON.parse(cleaned);
+      var parsed;
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch(parseErr) {
+        // Fallback: try extracting just through revisedResume if full parse fails
+        console.warn('Full parse failed, trying fallback:', parseErr.message);
+        throw new Error('Could not read audit response — please try again.');
+      }
       showEmailGate(parsed);
 
     } catch (err) {
@@ -1276,7 +1304,7 @@
 
   // ── PROMPT BUILDER ──
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    var text = resumeText.slice(0, 4500);
+    var text = resumeText.slice(0, 3000);
     var prompt = 'Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\n';
     prompt += 'RESUME:\n' + text + '\n\n';
     prompt += 'TARGET ROLE: ' + (targetRole || 'Not specified') + '\n';
@@ -1298,8 +1326,12 @@
     prompt += '\n4. OLDER ROLES — do NOT fabricate bullets for vague older experience\n';
     prompt += '\n5. EDUCATION — if none found, flag as warning\n';
     prompt += '\n6. GENERAL — section headers ALL CAPS, use bullet char, \\n for line breaks\n';
-    prompt += '\nReturn ONLY this JSON:\n';
-    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt recruiter take","atsNotes":"ATS risks","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n...\\n\\nEXPERIENCE\\n...\\n\\nEDUCATION\\n...\\n\\nSKILLS\\n..."}';
+    prompt += '\n7. NEW FIELDS — include these in the JSON:\n';
+    prompt += 'headlineInsight: 2 sentences to this person (not about the resume). Gap between their background and what the resume shows, then what fixing it unlocks. Warm insider tone.\n';
+    prompt += 'humanSignal: 3 sentences. Recruiter narrative inference, what is accidentally communicated, what positioning is missing. Specific to this resume.\n';
+    prompt += 'machineRead: Array of ATS flags. Each: {flag, risk: high/medium/low, fix}. 2-5 flags.\n';
+    prompt += 'realityCheck: {inYourControl: act on now, marketContext: honest market framing, beyondTheResume: what else matters}. 1-2 sentences each.\n';
+    prompt += '\nReturn ONLY valid JSON with these fields: score, issues, tenSecondTest, atsNotes, revisedResume, headlineInsight, humanSignal, machineRead, realityCheck\n';
     return prompt;
   }
 
@@ -1347,7 +1379,7 @@
     unlockBtn.textContent = 'One moment...';
 
     try {
-      var response = await fetch('/.netlify/functions/subscribe', {
+      var response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, name: name })
@@ -1619,7 +1651,7 @@
       var targetRole = document.getElementById('targetRole')
         ? document.getElementById('targetRole').value.trim() : '';
       var enriched = Object.assign({}, auditData, { targetRole: targetRole || null });
-      var res = await fetch('/.netlify/functions/saveAudit', {
+      var res = await fetch('/api/saveAudit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, auditData: enriched })
