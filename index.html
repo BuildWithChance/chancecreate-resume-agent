@@ -1146,7 +1146,7 @@
   // ── CONFIG ──
   (async function loadConfig() {
     try {
-      var res = await fetch('/.netlify/functions/getConfig');
+      var res = await fetch('/api/getConfig');
       var text = await res.text();
       if (!text || text.trim().startsWith('<')) return;
       var config = JSON.parse(text);
@@ -1240,7 +1240,7 @@
 
     try {
       var prompt = buildPrompt(resumeContent, targetRole, industry, focusNote);
-      var response = await fetch('/.netlify/functions/analyze', {
+      var response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
@@ -1304,7 +1304,7 @@
 
   // ── PROMPT BUILDER ──
   function buildPrompt(resumeText, targetRole, industry, focusNote) {
-    var text = resumeText.slice(0, 4500);
+    var text = resumeText.slice(0, 3000);
     var prompt = 'Audit this resume and return ONLY a single valid JSON object. No markdown, no backticks, no extra text.\n\n';
     prompt += 'RESUME:\n' + text + '\n\n';
     prompt += 'TARGET ROLE: ' + (targetRole || 'Not specified') + '\n';
@@ -1331,8 +1331,7 @@
     prompt += 'humanSignal: 3 sentences. Recruiter narrative inference, what is accidentally communicated, what positioning is missing. Specific to this resume.\n';
     prompt += 'machineRead: Array of ATS flags. Each: {flag, risk: high/medium/low, fix}. 2-5 flags.\n';
     prompt += 'realityCheck: {inYourControl: act on now, marketContext: honest market framing, beyondTheResume: what else matters}. 1-2 sentences each.\n';
-    prompt += '\nReturn ONLY this JSON structure:\n';
-    prompt += '{"score":"Needs Work","issues":[{"type":"critical","text":"specific issue"},{"type":"warning","text":"..."},{"type":"tip","text":"..."}],"tenSecondTest":"Blunt recruiter take","atsNotes":"ATS risks","revisedResume":"FULL NAME\\nCity, State | Phone | Email | LinkedIn\\n\\nSUMMARY\\n...\\n\\nEXPERIENCE\\n...\\n\\nEDUCATION\\n...\\n\\nSKILLS\\n...","headlineInsight":"2 sentences written directly to this person.","humanSignal":"3-4 sentences on what recruiters actually see.","machineRead":[{"flag":"what was detected","risk":"high","fix":"specific one-line fix"}],"realityCheck":{"inYourControl":"2-3 sentences on what to act on now.","marketContext":"1-2 sentences of honest market framing.","beyondTheResume":"1-2 sentences on what else matters."}}';
+    prompt += '\nReturn ONLY valid JSON with these fields: score, issues, tenSecondTest, atsNotes, revisedResume, headlineInsight, humanSignal, machineRead, realityCheck\n';
     return prompt;
   }
 
@@ -1380,7 +1379,7 @@
     unlockBtn.textContent = 'One moment...';
 
     try {
-      var response = await fetch('/.netlify/functions/subscribe', {
+      var response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, name: name })
@@ -1652,7 +1651,7 @@
       var targetRole = document.getElementById('targetRole')
         ? document.getElementById('targetRole').value.trim() : '';
       var enriched = Object.assign({}, auditData, { targetRole: targetRole || null });
-      var res = await fetch('/.netlify/functions/saveAudit', {
+      var res = await fetch('/api/saveAudit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, auditData: enriched })
