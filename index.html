@@ -1724,8 +1724,15 @@
       return;
     }
     if (!window.docx) {
-      alert('Document library not loaded yet — please wait a moment and try again.');
-      return;
+      btn.textContent = 'Loading...';
+      await new Promise(function(resolve, reject) {
+        var script = document.querySelector('script[src*="unpkg.com/docx"]');
+        if (!script) { reject(new Error('docx script not found')); return; }
+        var check = setInterval(function() {
+          if (window.docx) { clearInterval(check); resolve(); }
+        }, 100);
+        setTimeout(function() { clearInterval(check); reject(new Error('docx load timeout')); }, 8000);
+      });
     }
     btn.textContent = 'Building...';
     btn.disabled = true;
