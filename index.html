@@ -1641,7 +1641,7 @@
         hiBlock.style.display = 'none';
       }
     document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
-    document.getElementById('atsResult').textContent = data.atsNotes || '';
+    // atsResult removed — replaced by atsFlagsCard
     document.getElementById('revisedResume').textContent = (data.revisedResume || '').replace(/\\n/g, '\n');
 
     document.getElementById('results').classList.add('active');
