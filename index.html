@@ -1272,17 +1272,22 @@
       <div class="card-title">&#128269; Roles You May Not Have Considered</div>
       <div class="card-body" id="roleDiscoveryResult"></div>
     </div>
-
-    <div class="resume-wrap">
-      <div class="resume-wrap-header">
-        <span>&#10022; Rewritten Resume</span>
-        <div class="btn-group">
-          <button class="btn-sm" id="copyBtn" onclick="copyResume()">&#128203; Copy</button>
-          <button class="btn-sm" id="downloadBtn" onclick="downloadResume()">&#8595; Download PDF</button>
-        </div>
+  
+    <div class="issues-card" id="resumeCard" style="display:none;">
+    <div class="issues-header" onclick="toggleResume()">
+      <div class="issues-header-left">
+        <span class="issues-title">&#10022; Rewritten Resume</span>
+      </div>
+      <span class="issues-chevron" id="resumeChevron">▼</span>
+    </div>
+    <div class="issues-body" id="resumeBody">
+      <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+        <button class="btn-sm" id="copyBtn" onclick="copyResume()">&#128203; Copy Plain Text</button>
+        <button class="btn-sm" id="downloadDocxBtn" onclick="downloadDocx()">&#8595; Download Word Doc</button>
       </div>
       <div class="resume-output" id="revisedResume"></div>
     </div>
+   </div>
 
     <!-- Guest save prompt -->
     <div class="guest-save-prompt" id="guestSavePrompt">
@@ -1562,7 +1567,29 @@
     prompt += 'machineRead: Array of ATS flags. Each: {flag, risk: high/medium/low, fix}. 2-5 flags.\n';
     prompt += 'realityCheck: {inYourControl: act on now, marketContext: honest market framing, beyondTheResume: what else matters}. 1-2 sentences each.\n';
     prompt += '\nReturn ONLY valid JSON. The issues field MUST be an array of objects with exactly 2 keys each: "type" (must be exactly "critical", "warning", or "tip") and "text" (the issue description). Example: [{"type":"critical","text":"Missing contact info"},{"type":"warning","text":"Weak summary"}]\n';
-    prompt += 'Other required fields: score, tenSecondTest, atsNotes, revisedResume, headlineInsight, humanSignal, machineRead, realityCheck\n';
+    prompt += '\nFor the revisedResume field return a STRUCTURED JSON OBJECT (not a text blob) with these exact keys:\n';
+    prompt += '{\n';
+    prompt += '  "name": "Full Name",\n';
+    prompt += '  "contact": "City, State | Phone | Email | LinkedIn",\n';
+    prompt += '  "summary": "Professional summary paragraph",\n';
+    prompt += '  "sections": [\n';
+    prompt += '    {\n';
+    prompt += '      "title": "Professional Experience",\n';
+    prompt += '      "entries": [\n';
+    prompt += '        {\n';
+    prompt += '          "org": "Company Name",\n';
+    prompt += '          "title": "Job Title",\n';
+    prompt += '          "location": "City, State",\n';
+    prompt += '          "dates": "Month Year – Month Year",\n';
+    prompt += '          "bullets": ["bullet one", "bullet two"]\n';
+    prompt += '        }\n';
+    prompt += '      ]\n';
+    prompt += '    },\n';
+    prompt += '    { "title": "Education", "entries": [{ "org": "School", "title": "Degree", "location": "", "dates": "Year", "bullets": [] }] },\n';
+    prompt += '    { "title": "Skills", "entries": [], "prose": "skill1, skill2, skill3" }\n';
+    prompt += '  ]\n';
+    prompt += '}\n';
+    prompt += 'Other required fields: score, tenSecondTest, atsNotes, headlineInsight, humanSignal, machineRead, realityCheck\n';
     return prompt;
   }
 
@@ -1655,6 +1682,71 @@
     }, 150);
   }
 
+  function buildResumePreview(r) {
+    var lines = [];
+    if (r.name) lines.push(r.name.toUpperCase());
+    if (r.contact) lines.push(r.contact);
+    lines.push('');
+    if (r.summary) { lines.push('PROFESSIONAL SUMMARY'); lines.push(r.summary); lines.push(''); }
+    (r.sections || []).forEach(function(s) {
+      lines.push(s.title.toUpperCase());
+      if (s.prose) { lines.push(s.prose); lines.push(''); return; }
+      (s.entries || []).forEach(function(e) {
+        var titleLine = e.title || '';
+        if (e.location) titleLine += ' | ' + e.location;
+        lines.push(titleLine);
+        var orgLine = e.org || '';
+        if (e.dates) orgLine += '   ' + e.dates;
+        if (orgLine) lines.push(orgLine);
+        if (e.prose) lines.push(e.prose);
+        (e.bullets || []).forEach(function(b) { lines.push('• ' + b); });
+        lines.push('');
+      });
+    });
+    return lines.join('\n');
+  }
+  
+  function toggleResume() {
+    var body = document.getElementById('resumeBody');
+    var chevron = document.getElementById('resumeChevron');
+    var isOpen = body.style.display === 'block';
+    body.style.display = isOpen ? 'none' : 'block';
+    chevron.classList.toggle('open', !isOpen);
+  }
+  
+  async function downloadDocx() {
+    var btn = document.getElementById('downloadDocxBtn');
+    if (!btn) return;
+    var resume = window.structuredResume;
+    if (!resume) {
+      alert('Word download requires a fresh audit. Please run a new audit to get the styled download.');
+      return;
+    }
+    btn.textContent = 'Building...';
+    btn.disabled = true;
+    try {
+      var response = await fetch('/api/buildResume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resume)
+      });
+      if (!response.ok) throw new Error('Build failed');
+      var blob = await response.blob();
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'rewritten_resume.docx';
+      a.click();
+      URL.revokeObjectURL(url);
+      btn.textContent = '✓ Downloaded';
+      setTimeout(function() { btn.textContent = '↓ Download Word Doc'; btn.disabled = false; }, 3000);
+    } catch(err) {
+      btn.textContent = '↓ Download Word Doc';
+      btn.disabled = false;
+      alert('Download failed — please try again.');
+    }
+  }
+  
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -1767,7 +1859,21 @@
       }
     document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
     // atsResult removed — replaced by atsFlagsCard
-    document.getElementById('revisedResume').textContent = (data.revisedResume || '').replace(/\\n/g, '\n');
+    var resumeCard = document.getElementById('resumeCard');
+    var revisedResumeEl = document.getElementById('revisedResume');
+    if (data.revisedResume) {
+      if (typeof data.revisedResume === 'object') {
+        window.structuredResume = data.revisedResume;
+        var preview = buildResumePreview(data.revisedResume);
+        revisedResumeEl.textContent = preview;
+      } else {
+        window.structuredResume = null;
+        revisedResumeEl.textContent = (data.revisedResume || '').replace(/\\n/g, '\n');
+      }
+      resumeCard.style.display = 'block';
+    } else {
+      resumeCard.style.display = 'none';
+    }
 
     document.getElementById('results').classList.add('active');
     setTimeout(function() {
