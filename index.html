@@ -428,6 +428,43 @@
   .issues-chevron.open { transform: rotate(180deg); }
   .issues-body { display: none; padding: 0 24px 20px 24px; }
 
+  /* ── REALITY CHECK ── */
+  .reality-check {
+    background: rgba(201,122,58,0.07);
+    border: 1.5px solid rgba(201,122,58,0.25);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .reality-check-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--warn);
+    margin-bottom: 16px;
+  }
+  .reality-check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 640px) {
+    .reality-check-grid { grid-template-columns: 1fr; }
+  }
+  .reality-check-col-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .reality-check-col-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
   .resume-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1182,6 +1219,24 @@
     </div>
   </div>
 
+  <div class="reality-check" id="realityCheckBlock" style="display:none;">
+    <div class="reality-check-label">🎯 Reality Check</div>
+    <div class="reality-check-grid">
+      <div>
+        <div class="reality-check-col-title">In Your Control</div>
+        <div class="reality-check-col-body" id="rcControl"></div>
+      </div>
+      <div>
+        <div class="reality-check-col-title">Market Context</div>
+        <div class="reality-check-col-body" id="rcMarket"></div>
+      </div>
+      <div>
+        <div class="reality-check-col-title">Beyond the Resume</div>
+        <div class="reality-check-col-body" id="rcBeyond"></div>
+      </div>
+    </div>
+   </div>
+    
     <div class="human-signal-card" id="humanSignalCard" style="display:none;">
     <div class="human-signal-header" onclick="toggleHumanSignal()">
       <span class="human-signal-title">👁 What Recruiters Actually See</span>
@@ -1678,6 +1733,18 @@
       atsFlagsCard.style.display = 'block';
     } else {
       atsFlagsCard.style.display = 'none';
+    }
+    
+    // Reality Check
+    var rcBlock = document.getElementById('realityCheckBlock');
+    var rc = data.realityCheck || {};
+    if (rc.inYourControl || rc.marketContext || rc.beyondTheResume) {
+      document.getElementById('rcControl').textContent = rc.inYourControl || '';
+      document.getElementById('rcMarket').textContent = rc.marketContext || '';
+      document.getElementById('rcBeyond').textContent = rc.beyondTheResume || '';
+      rcBlock.style.display = 'block';
+    } else {
+      rcBlock.style.display = 'none';
     }
     
     // Human Signal card
