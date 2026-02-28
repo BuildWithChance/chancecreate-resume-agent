@@ -396,12 +396,45 @@
   .issue-item.warning .issue-tag { background: rgba(201,122,58,0.12); color: var(--warn); }
   .issue-item.tip .issue-tag { background: rgba(122,171,138,0.12); color: var(--success); }
 
+  /* ── ISSUES COLLAPSIBLE ── */
+  .issues-card {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .issues-header {
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .issues-header:hover { background: rgba(0,0,0,0.03); }
+  .issues-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .issues-title { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+  .issues-pill {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  .issues-pill.critical { background: rgba(224,82,82,0.12); color: var(--danger); }
+  .issues-pill.warning { background: rgba(201,122,58,0.12); color: var(--warn); }
+  .issues-pill.tip { background: rgba(122,171,138,0.15); color: var(--success); }
+  .issues-chevron { font-size: 12px; color: var(--muted); transition: transform 0.3s ease; }
+  .issues-chevron.open { transform: rotate(180deg); }
+  .issues-body { display: none; padding: 0 24px 20px 24px; }
+
   .resume-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
   }
+  
   .resume-wrap-header {
     background: var(--surface2);
     border-bottom: 1px solid var(--border);
@@ -1134,10 +1167,20 @@
       </div>
     </div>
     
-    <div class="card" data-section="issues">
-      <div class="card-title">&#9888; What's Costing You Interviews</div>
+  <div class="issues-card" id="issuesCard">
+    <div class="issues-header" onclick="toggleIssues()">
+      <div class="issues-header-left">
+        <span class="issues-title">⚠ What's Costing You Interviews</span>
+        <span id="issuesPillCritical" class="issues-pill critical" style="display:none;"></span>
+        <span id="issuesPillWarning" class="issues-pill warning" style="display:none;"></span>
+        <span id="issuesPillTip" class="issues-pill tip" style="display:none;"></span>
+      </div>
+      <span class="issues-chevron" id="issuesChevron">▼</span>
+    </div>
+    <div class="issues-body" id="issuesBody">
       <ul class="issue-list" id="issueList"></ul>
     </div>
+  </div>
 
     <div class="human-signal-card" id="humanSignalCard" style="display:none;">
     <div class="human-signal-header" onclick="toggleHumanSignal()">
@@ -1578,6 +1621,7 @@
 
     var issueList = document.getElementById('issueList');
     issueList.innerHTML = '';
+    var critCount = 0, warnCount = 0, tipCount = 0;
     (data.issues || []).forEach(function(issue) {
       var li = document.createElement('li');
       // Handle both {type, text} objects and plain strings
@@ -1595,6 +1639,20 @@
       li.innerHTML = '<span class="issue-tag">' + issueType + '</span><span>' + issueText + '</span>';
       issueList.appendChild(li);
     });
+
+    // Update pills
+    var pc = document.getElementById('issuesPillCritical');
+    var pw = document.getElementById('issuesPillWarning');
+    var pt = document.getElementById('issuesPillTip');
+    (data.issues || []).forEach(function(issue) {
+      var t = typeof issue === 'string' ? 'warning' : (issue.type || 'tip');
+      if (t === 'critical') critCount++;
+      else if (t === 'warning') warnCount++;
+      else tipCount++;
+    });
+    if (critCount > 0) { pc.textContent = critCount + ' critical'; pc.style.display = 'inline'; } else { pc.style.display = 'none'; }
+    if (warnCount > 0) { pw.textContent = warnCount + ' warning'; pw.style.display = 'inline'; } else { pw.style.display = 'none'; }
+    if (tipCount > 0) { pt.textContent = tipCount + ' tip'; pt.style.display = 'inline'; } else { pt.style.display = 'none'; }
 
     // ATS Flags card
     var atsFlagsCard = document.getElementById('atsFlagsCard');
@@ -2037,6 +2095,13 @@
   chevron.classList.toggle('open', !isOpen);
   }
 
+  function toggleIssues() {
+  var body = document.getElementById('issuesBody');
+  var chevron = document.getElementById('issuesChevron');
+  var isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  chevron.classList.toggle('open', !isOpen);
+  }
 
   // ── SIGNIN GATE ──
   function showSigninGate() {
