@@ -253,6 +253,61 @@
     color: var(--text);
   }
   
+  /* ── WHAT THE ATS SEES ── */
+  .ats-flags-card {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .ats-flags-header {
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .ats-flags-header:hover { background: rgba(0,0,0,0.03); }
+  .ats-flags-title { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); }
+  .ats-flags-count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-left: 10px;
+    background: rgba(224,82,82,0.1);
+    color: var(--danger);
+  }
+  .ats-flags-count.clean { background: rgba(122,171,138,0.15); color: var(--success); }
+  .ats-flags-chevron { font-size: 12px; color: var(--muted); transition: transform 0.3s ease; }
+  .ats-flags-chevron.open { transform: rotate(180deg); }
+  .ats-flags-body { display: none; padding: 0 24px 20px 24px; }
+  .ats-flag-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ats-flag-item:last-child { border-bottom: none; }
+  .ats-risk-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .ats-risk-badge.high { background: rgba(224,82,82,0.12); color: var(--danger); }
+  .ats-risk-badge.medium { background: rgba(201,122,58,0.12); color: var(--warn); }
+  .ats-risk-badge.low { background: rgba(122,171,138,0.15); color: var(--success); }
+  .ats-flag-content {}
+  .ats-flag-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .ats-flag-fix { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  
   .results.active { display: flex; }
 
   .score-banner {
@@ -1097,9 +1152,15 @@
       <div class="card-body" id="tenSecondResult"></div>
     </div>
 
-    <div class="card" data-section="ats">
-      <div class="card-title">&#129302; ATS &amp; Parsing Notes</div>
-      <div class="card-body" id="atsResult"></div>
+    <div class="ats-flags-card" id="atsFlagsCard" style="display:none;">
+      <div class="ats-flags-header" onclick="toggleAtsFlags()">
+        <div style="display:flex; align-items:center;">
+          <span class="ats-flags-title">🤖 What the ATS Sees</span>
+          <span class="ats-flags-count" id="atsFlagsCount"></span>
+        </div>
+        <span class="ats-flags-chevron" id="atsFlagsChevron">▼</span>
+      </div>
+      <div class="ats-flags-body" id="atsFlagsBody"></div>
     </div>
 
     <!-- FUTURE: JD Match — hidden until V3 -->
@@ -1531,6 +1592,32 @@
       issueList.appendChild(li);
     });
 
+    // ATS Flags card
+    var atsFlagsCard = document.getElementById('atsFlagsCard');
+    var atsFlagsBody = document.getElementById('atsFlagsBody');
+    var atsFlagsCount = document.getElementById('atsFlagsCount');
+    var flags = data.machineRead || [];
+    if (flags.length > 0) {
+      var highCount = flags.filter(function(f) { return f.risk === 'high'; }).length;
+      atsFlagsCount.textContent = highCount > 0 ? highCount + ' high risk' : flags.length + ' flags';
+      atsFlagsCount.className = 'ats-flags-count' + (highCount === 0 ? ' clean' : '');
+      atsFlagsBody.innerHTML = '';
+      flags.forEach(function(flag) {
+        var item = document.createElement('div');
+        item.className = 'ats-flag-item';
+        item.innerHTML =
+          '<span class="ats-risk-badge ' + (flag.risk || 'low') + '">' + (flag.risk || 'low') + '</span>' +
+          '<div class="ats-flag-content">' +
+            '<div class="ats-flag-name">' + escapeHtml(flag.flag || '') + '</div>' +
+            '<div class="ats-flag-fix">Fix: ' + escapeHtml(flag.fix || '') + '</div>' +
+          '</div>';
+        atsFlagsBody.appendChild(item);
+      });
+      atsFlagsCard.style.display = 'block';
+    } else {
+      atsFlagsCard.style.display = 'none';
+    }
+    
     // Human Signal card
     var hsCard = document.getElementById('humanSignalCard');
     var hsBody = document.getElementById('humanSignalBody');
@@ -1936,6 +2023,14 @@
       body.style.display = 'block';
       chevron.classList.add('open');
     }
+  }
+
+  function toggleAtsFlags() {
+  var body = document.getElementById('atsFlagsBody');
+  var chevron = document.getElementById('atsFlagsChevron');
+  var isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  chevron.classList.toggle('open', !isOpen);
   }
   
   function escapeHtml(str) {
