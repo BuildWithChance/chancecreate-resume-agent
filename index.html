@@ -1283,7 +1283,7 @@
     <div class="issues-body" id="resumeBody">
       <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
         <button class="btn-sm" id="copyBtn" onclick="copyResume()">&#128203; Copy Plain Text</button>
-        <button class="btn-sm" id="downloadDocxBtn" onclick="downloadDocx()">&#8595; Download Word Doc</button>
+        <button class="btn-sm" id="downloadDocxBtn" onclick="downloadResumePDF()">&#8595; Download PDF</button>
       </div>
       <div class="resume-output" id="revisedResume"></div>
     </div>
@@ -1714,138 +1714,18 @@
     chevron.classList.toggle('open', !isOpen);
   }
   
-  async function downloadDocx() {
-    var btn = document.getElementById('downloadDocxBtn');
-    if (!btn) return;
-    var resume = window.structuredResume;
-    if (!resume) {
-      alert('Word download requires a fresh audit. Please run a new audit to get the styled download.');
-      return;
-    }
-    
-    if (!window.docx) {
-      btn.textContent = 'Loading...';
-      await new Promise(function(resolve, reject) {
-        var script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/docx@9.5.3/build/index.js';
-        script.onload = resolve;
-        script.onerror = function() { reject(new Error('Failed to load docx library')); };
-        document.head.appendChild(script);
-        setTimeout(function() { reject(new Error('docx load timeout')); }, 10000);
-      });
-    }
-    btn.textContent = 'Building...';
-    btn.disabled = true;
-    try {
-      var d = window.docx;
-      var children = [];
-  
-      children.push(new d.Paragraph({
-        alignment: d.AlignmentType.CENTER,
-        spacing: { after: 40 },
-        children: [new d.TextRun({ text: (resume.name || '').toUpperCase(), bold: true, size: 36, font: 'Calibri', color: '1A1A1A' })]
-      }));
-      if (resume.contact) {
-        children.push(new d.Paragraph({
-          alignment: d.AlignmentType.CENTER,
-          spacing: { after: 60 },
-          children: [new d.TextRun({ text: resume.contact, size: 19, font: 'Calibri', color: '444444' })]
-        }));
-      }
-  
-      function sectionHeader(text) {
-        return new d.Paragraph({
-          spacing: { before: 180, after: 60 },
-          border: { bottom: { style: d.BorderStyle.SINGLE, size: 8, color: '4B3F72', space: 2 } },
-          children: [new d.TextRun({ text: text.toUpperCase(), bold: true, size: 22, font: 'Calibri', color: '4B3F72' })]
-        });
-      }
-  
-      if (resume.summary) {
-        children.push(sectionHeader('Professional Summary'));
-        children.push(new d.Paragraph({
-          spacing: { before: 60, after: 60 },
-          children: [new d.TextRun({ text: resume.summary, size: 20, font: 'Calibri' })]
-        }));
-      }
-  
-      (resume.sections || []).forEach(function(section) {
-        children.push(sectionHeader(section.title));
-        if (section.prose) {
-          children.push(new d.Paragraph({
-            spacing: { before: 60, after: 60 },
-            children: [new d.TextRun({ text: section.prose, size: 19, font: 'Calibri' })]
-          }));
-          return;
-        }
-        (section.entries || []).forEach(function(entry) {
-          children.push(new d.Paragraph({
-            spacing: { before: 140, after: 20 },
-            children: [
-              new d.TextRun({ text: entry.title || '', bold: true, size: 22, font: 'Calibri' }),
-              entry.location ? new d.TextRun({ text: '  |  ' + entry.location, size: 20, font: 'Calibri', color: '666666' }) : new d.TextRun({ text: '' })
-            ]
-          }));
-          children.push(new d.Paragraph({
-            spacing: { before: 0, after: 40 },
-            children: [
-              new d.TextRun({ text: entry.org || '', bold: true, size: 20, font: 'Calibri', color: '4B3F72' }),
-              entry.dates ? new d.TextRun({ text: '   ' + entry.dates, size: 19, font: 'Calibri', color: '666666' }) : new d.TextRun({ text: '' })
-            ]
-          }));
-          (entry.bullets || []).forEach(function(b) {
-            children.push(new d.Paragraph({
-              numbering: { reference: 'bullets', level: 0 },
-              spacing: { before: 20, after: 20 },
-              children: [new d.TextRun({ text: b, size: 20, font: 'Calibri' })]
-            }));
-          });
-          if (entry.prose) {
-            children.push(new d.Paragraph({
-              spacing: { before: 20, after: 20 },
-              children: [new d.TextRun({ text: entry.prose, size: 19, font: 'Calibri', color: '555555' })]
-            }));
-          }
-        });
-      });
-  
-      var doc = new d.Document({
-        numbering: {
-          config: [{
-            reference: 'bullets',
-            levels: [{
-              level: 0, format: d.LevelFormat.BULLET, text: '\u2022',
-              alignment: d.AlignmentType.LEFT,
-              style: { paragraph: { indent: { left: 480, hanging: 240 } } }
-            }]
-          }]
-        },
-        sections: [{
-          properties: {
-            page: {
-              size: { width: 12240, height: 15840 },
-              margin: { top: 864, right: 1008, bottom: 864, left: 1008 }
-            }
-          },
-          children: children
-        }]
-      });
-  
-      var buffer = await d.Packer.toBlob(doc);
-      var url = URL.createObjectURL(buffer);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'rewritten_resume.docx';
-      a.click();
-      URL.revokeObjectURL(url);
-      btn.textContent = '✓ Downloaded';
-      setTimeout(function() { btn.textContent = '↓ Download Word Doc'; btn.disabled = false; }, 3000);
-    } catch(err) {
-      console.error('DOCX error:', err);
-      btn.textContent = '↓ Download Word Doc';
-      btn.disabled = false;
-      alert('Download failed: ' + err.message);
-    }
+  function downloadResumePDF() {
+    var content = document.getElementById('revisedResume').textContent;
+    if (!content) return;
+    var win = window.open('', '_blank');
+    win.document.write('<html><head><title>Resume</title><style>');
+    win.document.write('body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.6; max-width: 750px; margin: 40px auto; color: #1a1a1a; }');
+    win.document.write('pre { white-space: pre-wrap; font-family: Calibri, Arial, sans-serif; font-size: 11pt; }');
+    win.document.write('@media print { body { margin: 0.75in; } }');
+    win.document.write('</style></head><body><pre>' + content + '</pre></body></html>');
+    win.document.close();
+    win.focus();
+    setTimeout(function() { win.print(); }, 500);
   }
   
   function escapeHtml(str) {
