@@ -1699,7 +1699,9 @@
         if (e.dates) orgLine += '   ' + e.dates;
         if (orgLine) lines.push(orgLine);
         if (e.prose) lines.push(e.prose);
-        (e.bullets || []).forEach(function(b) { lines.push('• ' + b); });
+        (e.bullets || []).filter(function(b) {
+    return b && !b.startsWith('[') && !b.startsWith('•');
+      }).forEach(function(b) { lines.push('• ' + b); });
         lines.push('');
       });
     });
