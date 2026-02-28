@@ -211,6 +211,20 @@
   .loading p strong { color: var(--text); }
 
   .results { display: none; flex-direction: column; gap: 18px; }
+  /* ── HEADLINE INSIGHT ── */
+  .headline-insight {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-left: 4px solid var(--accent-deep);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .headline-insight-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+  .headline-insight-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-deep); margin-bottom: 8px; }
+  .headline-insight-text { font-size: 15px; line-height: 1.7; color: var(--text); font-style: italic; }
   .results.active { display: flex; }
 
   .score-banner {
@@ -1029,6 +1043,14 @@
   <div class="results" id="results">
     <div id="scoreBannerRoot"></div>
 
+    <div class="headline-insight" id="headlineInsightBlock" style="display:none;">
+      <div class="headline-insight-icon">✦</div>
+      <div class="headline-insight-body">
+        <div class="headline-insight-label">Recruiter's Take — Just for You</div>
+        <div class="headline-insight-text" id="headlineInsightText"></div>
+      </div>
+    </div>
+    
     <div class="card" data-section="issues">
       <div class="card-title">&#9888; What's Costing You Interviews</div>
       <ul class="issue-list" id="issueList"></ul>
@@ -1473,6 +1495,14 @@
       issueList.appendChild(li);
     });
 
+    var hiBlock = document.getElementById('headlineInsightBlock');
+    var hiText = document.getElementById('headlineInsightText');
+      if (data.headlineInsight && data.headlineInsight.trim()) {
+        hiText.textContent = data.headlineInsight;
+        hiBlock.style.display = 'flex';
+      } else {
+        hiBlock.style.display = 'none';
+      }
     document.getElementById('tenSecondResult').textContent = data.tenSecondTest || '';
     document.getElementById('atsResult').textContent = data.atsNotes || '';
     document.getElementById('revisedResume').textContent = (data.revisedResume || '').replace(/\\n/g, '\n');
