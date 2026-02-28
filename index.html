@@ -1087,7 +1087,6 @@
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@9.5.3/build/index.js"></script>
 </head>
 <body>
 
@@ -1723,15 +1722,16 @@
       alert('Word download requires a fresh audit. Please run a new audit to get the styled download.');
       return;
     }
+    
     if (!window.docx) {
       btn.textContent = 'Loading...';
       await new Promise(function(resolve, reject) {
-        var script = document.querySelector('script[src*="unpkg.com/docx"]');
-        if (!script) { reject(new Error('docx script not found')); return; }
-        var check = setInterval(function() {
-          if (window.docx) { clearInterval(check); resolve(); }
-        }, 100);
-        setTimeout(function() { clearInterval(check); reject(new Error('docx load timeout')); }, 8000);
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/docx@9.5.3/build/index.js';
+        script.onload = resolve;
+        script.onerror = function() { reject(new Error('Failed to load docx library')); };
+        document.head.appendChild(script);
+        setTimeout(function() { reject(new Error('docx load timeout')); }, 10000);
       });
     }
     btn.textContent = 'Building...';
