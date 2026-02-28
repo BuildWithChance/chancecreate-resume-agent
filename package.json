@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "build": "echo 'build complete'"
+  },
+  "dependencies": {
+    "docx": "^9.5.3"
   }
 }
