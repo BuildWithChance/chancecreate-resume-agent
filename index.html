@@ -225,6 +225,34 @@
   .headline-insight-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
   .headline-insight-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-deep); margin-bottom: 8px; }
   .headline-insight-text { font-size: 15px; line-height: 1.7; color: var(--text); font-style: italic; }
+  
+  /* ── WHAT RECRUITERS SEE ── */
+  .human-signal-card {
+    background: rgba(206,177,221,0.13);
+    border: 1.5px solid rgba(206,177,221,0.4);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .human-signal-header {
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .human-signal-header:hover { background: rgba(206,177,221,0.12); }
+  .human-signal-title { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-deep); }
+  .human-signal-chevron { font-size: 12px; color: var(--accent-deep); transition: transform 0.3s ease; }
+  .human-signal-chevron.open { transform: rotate(180deg); }
+  .human-signal-body {
+    display: none;
+    padding: 0 24px 20px 24px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--text);
+  }
+  
   .results.active { display: flex; }
 
   .score-banner {
@@ -1056,6 +1084,14 @@
       <ul class="issue-list" id="issueList"></ul>
     </div>
 
+    <div class="human-signal-card" id="humanSignalCard" style="display:none;">
+    <div class="human-signal-header" onclick="toggleHumanSignal()">
+      <span class="human-signal-title">👁 What Recruiters Actually See</span>
+      <span class="human-signal-chevron" id="humanSignalChevron">▼</span>
+    </div>
+      <div class="human-signal-body" id="humanSignalBody"></div>
+    </div>
+    
     <div class="card" data-section="ten-second">
       <div class="card-title">&#9889; The 10-Second Scan Test</div>
       <div class="card-body" id="tenSecondResult"></div>
@@ -1495,6 +1531,16 @@
       issueList.appendChild(li);
     });
 
+    // Human Signal card
+    var hsCard = document.getElementById('humanSignalCard');
+    var hsBody = document.getElementById('humanSignalBody');
+    if (data.humanSignal && data.humanSignal.trim()) {
+      hsBody.textContent = data.humanSignal;
+      hsCard.style.display = 'block';
+    } else {
+      hsCard.style.display = 'none';
+    }
+        
     var hiBlock = document.getElementById('headlineInsightBlock');
     var hiText = document.getElementById('headlineInsightText');
       if (data.headlineInsight && data.headlineInsight.trim()) {
@@ -1878,6 +1924,19 @@
       var el = document.getElementById('recruitFact');
       if (el) { el.textContent = ''; el.style.opacity = '0'; }
     }
+  
+  function toggleHumanSignal() {
+    var body = document.getElementById('humanSignalBody');
+    var chevron = document.getElementById('humanSignalChevron');
+    var isOpen = body.style.display === 'block';
+    if (isOpen) {
+      body.style.display = 'none';
+      chevron.classList.remove('open');
+    } else {
+      body.style.display = 'block';
+      chevron.classList.add('open');
+    }
+  }
   
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
