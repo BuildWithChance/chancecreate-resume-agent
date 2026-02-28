@@ -1557,6 +1557,10 @@
     }, 150);
   }
 
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  
   // ── RENDER RESULTS ──
   function renderResults(data) {
     var rawScore = data.score || 'Needs Work';
@@ -2032,10 +2036,7 @@
   body.style.display = isOpen ? 'none' : 'block';
   chevron.classList.toggle('open', !isOpen);
   }
-  
-  function escapeHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+
 
   // ── SIGNIN GATE ──
   function showSigninGate() {
